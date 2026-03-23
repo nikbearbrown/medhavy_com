@@ -73,7 +73,7 @@ export default function Home() {
                 Medhavy
               </h1>
               <p className="text-lg text-muted-foreground">
-                Often spelled Medhavy
+                Also known as Medhavi
               </p>
               <p className="max-w-[540px] text-lg leading-relaxed">
                 <strong className="font-bold">
@@ -176,6 +176,69 @@ export default function Home() {
                   ))}
                 </ul>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      {/* CTA Section */}
+      <section className="w-full py-16 md:py-24 bg-[var(--bb-2)] text-white">
+        <div className="container px-4 md:px-6 mx-auto text-center">
+          <h2 className="text-sm font-semibold tracking-widest uppercase text-white/60 mb-3">
+            Ready to Transform Your Courses?
+          </h2>
+          <p className="text-lg text-white/80 max-w-3xl mx-auto mb-10 leading-relaxed">
+            Medhavy turns any textbook into an AI-curated, conversational, and empathetic
+            course inside Canvas—unifying fragmented content, reducing faculty workload, and
+            giving students effortless, human-centered access to knowledge.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <a
+              href="mailto:medhavy@humanitarians.ai"
+              className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold tracking-wide transition-colors bg-white text-[var(--bb-2)] shadow hover:bg-white/90"
+            >
+              REQUEST A DEMO
+            </a>
+            <a
+              href="/about"
+              className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold tracking-wide transition-colors border border-white/30 text-white hover:bg-white/10"
+            >
+              LEARN MORE
+            </a>
+            <a
+              href="mailto:medhavy@humanitarians.ai"
+              className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold tracking-wide transition-colors border border-white/30 text-white hover:bg-white/10"
+            >
+              CONTACT US
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Connect Section */}
+      <section className="w-full py-16 md:py-24 bg-foreground text-background">
+        <div className="container px-4 md:px-6 mx-auto text-center">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl mb-4">
+            Let&apos;s Collaborate
+          </h2>
+          <p className="max-w-[600px] mx-auto text-background/70 text-lg mb-8">
+            Whether you need an adaptive learning platform, a white-label deployment
+            for your institution, or a research partnership — let&apos;s talk.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            {[
+              { name: 'YouTube', href: 'https://www.youtube.com/@NikBearBrown' },
+              { name: 'GitHub', href: 'https://github.com/nikbearbrown' },
+              { name: 'Humanitarians AI', href: 'https://humanitarians.ai' },
+            ].map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors border border-background/30 text-background hover:bg-background/10"
+              >
+                {link.name}
+              </a>
             ))}
           </div>
         </div>

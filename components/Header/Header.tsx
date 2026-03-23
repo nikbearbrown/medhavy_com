@@ -20,6 +20,7 @@ const NAV_ITEMS = [
 const SOCIAL_LINKS = [
   { name: 'GitHub', href: 'https://github.com/nikbearbrown' },
   { name: 'YouTube', href: 'https://www.youtube.com/@NikBearBrown' },
+  { name: 'Substack', href: 'https://medhavy.substack.com/' },
 ]
 
 const buttonStyles =

@@ -159,7 +159,7 @@ export default function DeweyPage() {
             <h2 className="text-3xl font-bold mb-6">Key Projects</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Intelligent AI Books (Medhavi)</h3>
+                <h3 className="text-xl font-bold mb-3">Intelligent AI Books (Medhavy)</h3>
                 <p className="text-muted-foreground mb-4">
                   Transforming learning through personalized conversational AI books that adapt content to individual learners, solving the "chicken and egg" problem by guiding conversations through dynamic Socratic dialogue.
                 </p>
