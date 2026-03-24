@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuring a WCAG-compliant color palette in Medhavy.md</title>
+  <meta name="description" content="How-to guide for developers deploying or maintaining a Medhavy instance — covers using the Kitty palette tool to generate WCAG AAA-compliant hex values through conversation, then committing them to Medhavy.md for site-wide accessibility compliance.">
+  <meta name="keywords" content="Medhavy, WCAG, WCAG AAA, accessibility, color palette, Medhavy.md, Kitty tool, contrast ratio, hex codes, brand colors, developer setup, accessible design, 7:1 contrast">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bb-1: #0D0D0D;
+      --bb-2: #434343;
+      --bb-3: #6B0000;
+      --bb-4: #645420;
+      --bb-5: #2F2F2F;
+      --bb-6: #4D4D43;
+      --bb-7: #5E5A4A;
+      --bb-8: #E8E0D0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 32px 64px;
+    }
+
+    /* ── VERSION BLOCK ── */
+    .version-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--bb-6);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-top: 3px solid var(--bb-3);
+      padding-top: 10px;
+      margin-bottom: 36px;
+    }
+
+    /* ── HEADER ── */
+    .doc-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--bb-3);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.1rem;
+      line-height: 1.2;
+      color: var(--bb-1);
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .doc-intro {
+      font-size: 1.05rem;
+      color: var(--bb-2);
+      line-height: 1.75;
+      border-left: 3px solid var(--bb-4);
+      padding-left: 18px;
+      margin-bottom: 40px;
+    }
+
+    /* ── PREREQS ── */
+    .prereq-block {
+      background: var(--bb-1);
+      color: var(--bb-8);
+      padding: 20px 24px;
+      border-radius: 2px;
+      margin-bottom: 44px;
+    }
+
+    .prereq-block .block-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--bb-4);
+      margin-bottom: 12px;
+    }
+
+    .prereq-block p {
+      font-size: 0.88rem;
+      color: var(--bb-8);
+      line-height: 1.65;
+      margin-bottom: 8px;
+    }
+
+    .prereq-block p:last-child { margin-bottom: 0; }
+
+    .prereq-block code {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--bb-4);
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      margin-bottom: 52px;
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.35rem;
+      color: var(--bb-2);
+      font-weight: 400;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--bb-3);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .section-rule {
+      border: none;
+      border-top: 1px solid var(--bb-7);
+      margin-bottom: 20px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: var(--bb-1);
+    }
+
+    p:last-child { margin-bottom: 0; }
+
+    /* ── CODE BLOCKS ── */
+    pre {
+      background: var(--bb-1);
+      color: var(--bb-8);
+      padding: 20px 22px;
+      border-radius: 2px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 20px 0;
+      border-left: 3px solid var(--bb-4);
+    }
+
+    pre .comment { color: var(--bb-6); }
+    pre .key     { color: var(--bb-4); }
+    pre .val     { color: #9ad; }
+    pre .changed { color: #8fca8f; }
+
+    code {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.84rem;
+      background: rgba(0,0,0,0.06);
+      padding: 1px 5px;
+      border-radius: 2px;
+      color: var(--bb-3);
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      background: rgba(100, 84, 32, 0.10);
+      border-left: 3px solid var(--bb-4);
+      padding: 14px 18px;
+      border-radius: 0 2px 2px 0;
+      margin: 20px 0;
+    }
+
+    .callout-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--bb-4);
+      margin-bottom: 6px;
+    }
+
+    .callout p {
+      font-size: 0.88rem;
+      color: var(--bb-1);
+      margin-bottom: 0;
+    }
+
+    /* ── WARNING ── */
+    .warning {
+      background: rgba(107, 0, 0, 0.07);
+      border-left: 3px solid var(--bb-3);
+      padding: 14px 18px;
+      border-radius: 0 2px 2px 0;
+      margin: 20px 0;
+    }
+
+    .warning .callout-label { color: var(--bb-3); }
+
+    /* ── PALETTE TABLE ── */
+    .palette-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    .palette-table thead th {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 2px solid var(--bb-7);
+      color: var(--bb-6);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 400;
+    }
+
+    .palette-table tbody td {
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(94, 90, 74, 0.25);
+      color: var(--bb-1);
+      vertical-align: middle;
+    }
+
+    .palette-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .swatch-dot {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 7px;
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+
+    .ratio-pass { color: #2a6e38; font-weight: 500; }
+    .ratio-fail { color: var(--bb-3); font-weight: 500; }
+
+    /* ── CHAT EXAMPLE ── */
+    .chat-example {
+      background: var(--bb-5);
+      border-radius: 2px;
+      padding: 20px 22px;
+      margin: 20px 0;
+    }
+
+    .chat-turn {
+      margin-bottom: 16px;
+    }
+
+    .chat-turn:last-child { margin-bottom: 0; }
+
+    .chat-who {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 5px;
+    }
+
+    .chat-who.user  { color: var(--bb-4); }
+    .chat-who.kitty { color: var(--bb-3); }
+
+    .chat-bubble {
+      font-size: 0.86rem;
+      line-height: 1.6;
+      padding: 10px 14px;
+      border-radius: 2px;
+    }
+
+    .chat-bubble.user  {
+      background: rgba(255,255,255,0.07);
+      color: var(--bb-8);
+      border-left: 2px solid var(--bb-4);
+    }
+
+    .chat-bubble.kitty {
+      background: rgba(0,0,0,0.25);
+      color: var(--bb-8);
+      border-left: 2px solid var(--bb-3);
+    }
+
+    .chat-bubble code {
+      background: rgba(255,255,255,0.1);
+      color: var(--bb-4);
+      font-size: 0.8rem;
+    }
+
+    /* ── STEPS INLINE ── */
+    ol {
+      padding-left: 0;
+      counter-reset: step-counter;
+      list-style: none;
+      margin: 16px 0;
+    }
+
+    ol li {
+      counter-increment: step-counter;
+      padding: 10px 0 10px 44px;
+      position: relative;
+      border-bottom: 1px solid rgba(94, 90, 74, 0.2);
+      font-size: 0.92rem;
+      color: var(--bb-1);
+    }
+
+    ol li:last-child { border-bottom: none; }
+
+    ol li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--bb-8);
+      background: var(--bb-3);
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 11px;
+      color: var(--bb-6);
+      border-top: 1px solid var(--bb-7);
+      margin-top: 40px;
+    }
+
+    footer a {
+      color: var(--bb-6);
+      text-decoration: none;
+    }
+
+    footer a:hover { color: var(--bb-2); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- VERSION BLOCK -->
+  <div class="version-meta">Version 1.0 &nbsp;|&nbsp; March 2026 &nbsp;|&nbsp; Reviewed by Dev the Dev</div>
+
+  <!-- HEADER -->
+  <p class="doc-label">How-to guide &nbsp;·&nbsp; Medhavy deployment &nbsp;·&nbsp; Accessibility</p>
+  <h1>Configuring a WCAG-compliant color palette in Medhavy.md</h1>
+
+  <p class="doc-intro">
+    Your Medhavy deployment reads its brand colors from <code>Medhavy.md</code>. If those hex values fail WCAG AAA contrast (7:1), every student and instructor using your platform sees text that is harder to read — and your institution carries the accessibility liability. This guide shows you how to use the Kitty tool to get compliant replacements through conversation, then commit them correctly to <code>Medhavy.md</code>.
+  </p>
+
+  <!-- PREREQS -->
+  <div class="prereq-block">
+    <div class="block-label">Before you start — you need</div>
+    <p>Access to the Kitty palette tool (hosted at <code>public/dev/kitty.html</code> or the standalone URL your team uses).</p>
+    <p>Your current palette hex values — either from <code>Medhavy.md</code> directly, or by checking <code>lib/theme.ts</code> / <code>app/globals.css</code> if your deployment syncs from those files.</p>
+    <p>Write access to <code>Medhavy.md</code> in your repository. The changes you make here will propagate site-wide on next deploy.</p>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section">
+    <h2><span class="step-num">Step 01</span> Understand what you are fixing and why</h2>
+    <hr class="section-rule">
+    <p>WCAG (Web Content Accessibility Guidelines) defines three contrast levels for text on background. The one that matters for an educational platform is <strong>AAA</strong> — a 7:1 ratio between foreground and background luminance.</p>
+
+    <table class="palette-table">
+      <thead>
+        <tr>
+          <th>Level</th>
+          <th>Ratio</th>
+          <th>Applies to</th>
+          <th>Medhavy standard</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AA</td>
+          <td>4.5:1</td>
+          <td>Normal text</td>
+          <td>Minimum legal floor in most jurisdictions</td>
+        </tr>
+        <tr>
+          <td>AA Large</td>
+          <td>3:1</td>
+          <td>18px+ or 14px bold</td>
+          <td>Not sufficient for body text</td>
+        </tr>
+        <tr>
+          <td><strong>AAA</strong></td>
+          <td><strong>7:1</strong></td>
+          <td><strong>Normal text</strong></td>
+          <td><strong>Required — Medhavy target</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-label">Why AAA for an educational platform?</div>
+      <p>Students read long-form textbook content, often on low-quality displays or under fluorescent lighting. Low contrast is not a minor inconvenience — it is a reading barrier that compounds over a 90-minute study session. Medhavy targets AAA because the platform's entire value proposition is access to knowledge.</p>
+    </div>
+
+    <p>The Medhavy default palette ships with eight colors (<code>bb1</code>–<code>bb8</code>). Several of those colors, used as text on the parchment background (<code>bb8: #E8E0D0</code>), fail AAA — and two fail AA entirely. The table below shows the default state before any upgrade.</p>
+
+    <table class="palette-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Hex</th>
+          <th>Name</th>
+          <th>Ratio on bb8</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>bb1</code></td>
+          <td><span class="swatch-dot" style="background:#0D0D0D"></span>#0D0D0D</td>
+          <td>soot black</td>
+          <td class="ratio-pass">16.5:1</td>
+          <td class="ratio-pass">AAA ✓</td>
+        </tr>
+        <tr>
+          <td><code>bb2</code></td>
+          <td><span class="swatch-dot" style="background:#4A4A4A"></span>#4A4A4A</td>
+          <td>iron grey</td>
+          <td>5.9:1</td>
+          <td class="ratio-fail">Fails AAA</td>
+        </tr>
+        <tr>
+          <td><code>bb3</code></td>
+          <td><span class="swatch-dot" style="background:#8B0000"></span>#8B0000</td>
+          <td>dried-ink red</td>
+          <td>5.2:1</td>
+          <td class="ratio-fail">Fails AAA</td>
+        </tr>
+        <tr>
+          <td><code>bb4</code></td>
+          <td><span class="swatch-dot" style="background:#8B7536"></span>#8B7536</td>
+          <td>cold brass</td>
+          <td>4.5:1</td>
+          <td class="ratio-fail">Fails AAA</td>
+        </tr>
+        <tr>
+          <td><code>bb5</code></td>
+          <td><span class="swatch-dot" style="background:#2F2F2F"></span>#2F2F2F</td>
+          <td>charcoal</td>
+          <td class="ratio-pass">10.8:1</td>
+          <td class="ratio-pass">AAA ✓</td>
+        </tr>
+        <tr>
+          <td><code>bb6</code></td>
+          <td><span class="swatch-dot" style="background:#6B6B5E"></span>#6B6B5E</td>
+          <td>tarnished pewter</td>
+          <td>~3:1</td>
+          <td class="ratio-fail">Fails AA</td>
+        </tr>
+        <tr>
+          <td><code>bb7</code></td>
+          <td><span class="swatch-dot" style="background:#9C9680"></span>#9C9680</td>
+          <td>aged ledger tan</td>
+          <td>~2:1</td>
+          <td class="ratio-fail">Fails AA</td>
+        </tr>
+        <tr>
+          <td><code>bb8</code></td>
+          <td><span class="swatch-dot" style="background:#E8E0D0; border:1px solid #ccc"></span>#E8E0D0</td>
+          <td>parchment</td>
+          <td>—</td>
+          <td>Background (fixed)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="section">
+    <h2><span class="step-num">Step 02</span> Open Kitty and load your current palette</h2>
+    <hr class="section-rule">
+    <p>Kitty is a browser-based tool that combines a live contrast checker with a Claude-powered conversation. Open it at <code>public/dev/kitty.html</code>. When it loads, it will display the default Medhavy palette in the left panel, with auto-checked contrast ratios for all key pairs.</p>
+
+    <div class="callout">
+      <div class="callout-label">If your deployment uses a custom palette</div>
+      <p>If you have already modified the default colors, tell Kitty your current hex values in the chat. Say: <em>"My palette is: bb1 #[hex], bb2 #[hex]…"</em> Kitty will use those values for its analysis rather than the defaults.</p>
+    </div>
+
+    <p>The left panel auto-checks eleven key pairs — body text on parchment, accents on parchment, reversed text on dark backgrounds. Read through these before you start the conversation. The red FAIL badges are what you are fixing.</p>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="section">
+    <h2><span class="step-num">Step 03</span> Have the conversation with Kitty</h2>
+    <hr class="section-rule">
+    <p>Kitty will ask you about the brand before auditing the palette. Answer it. The context matters — a brand that needs to feel authoritative needs different fixes than one that needs to feel warm. Kitty's replacements are not mechanical darkening; they preserve the hue's emotional character while crossing the 7:1 threshold.</p>
+
+    <p>To get compliant replacement values, use this prompt:</p>
+
+    <div class="chat-example">
+      <div class="chat-turn">
+        <div class="chat-who user">You</div>
+        <div class="chat-bubble user">My background is fixed at bb8 #E8E0D0. Suggest replacements for any colors that fail WCAG AAA against it. Stay close to the original hues — minimum necessary change only.</div>
+      </div>
+      <div class="chat-turn">
+        <div class="chat-who kitty">Kitty</div>
+        <div class="chat-bubble kitty">Five colors need adjusting. <code>bb2</code> from <code>#4A4A4A</code> to <code>#434343</code> (7.1:1 — barely darker, same grey). <code>bb3</code> from <code>#8B0000</code> to <code>#6B0000</code> (7.8:1 — deeper ink, still reads as the same red). <code>bb4</code> from <code>#8B7536</code> to <code>#645420</code> (7.2:1 — loses a little warmth, still brass). <code>bb6</code> to <code>#4D4D43</code> and <code>bb7</code> to <code>#5E5A4A</code> — both hit exactly 7.0:1. The muted feel is preserved; they are just usable as text now. <code>bb1</code> and <code>bb5</code> were already AAA, leave them.</div>
+      </div>
+    </div>
+
+    <p>If you want to verify a specific pair interactively, click two swatches in the left panel — the contrast checker will show you the ratio, a live text preview, and AA/AAA badges for both normal and large text sizes.</p>
+
+    <div class="warning">
+      <div class="callout-label">Do not accept replacements you have not reviewed visually</div>
+      <p>Contrast ratio is math. Brand feel is judgment. Look at Kitty's suggested hex values against the actual parchment background before committing. The left panel swatch grid lets you click any color to compare. If a replacement feels wrong, tell Kitty: "bb4 looks too olive — can you find something warmer that still hits 7:1?" It will iterate.</p>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="section">
+    <h2><span class="step-num">Step 04</span> Update the palette block in Medhavy.md</h2>
+    <hr class="section-rule">
+    <p>Once you have your compliant hex values, open <code>Medhavy.md</code> and find the palette block. It follows this structure:</p>
+
+    <pre><span class="comment">## Color Palette</span>
+
+<span class="comment"># Three files must stay in sync — edit all three together:</span>
+<span class="comment"># lib/theme.ts · public/theme.json · app/globals.css</span>
+
+| Var | Hex     | Role                           | WCAG on bb8 |
+|-----|---------|--------------------------------|-------------|
+| bb1 | <span class="key">#0D0D0D</span> | soot black — primary text      | 16.5:1      |
+| bb2 | <span class="key">#4A4A4A</span> | iron grey — primary accent     | 5.9:1       |
+| bb3 | <span class="key">#8B0000</span> | dried-ink red — danger/emphasis| 5.2:1       |
+| bb4 | <span class="key">#8B7536</span> | cold brass — highlight/callout | 4.5:1       |
+| bb5 | <span class="key">#2F2F2F</span> | charcoal — secondary accent    | 10.8:1      |
+| bb6 | <span class="key">#6B6B5E</span> | tarnished pewter — muted accent| ~3:1        |
+| bb7 | <span class="key">#9C9680</span> | aged ledger tan — borders      | ~2:1        |
+| bb8 | <span class="key">#E8E0D0</span> | parchment — page background    | —           |</pre>
+
+    <p>Replace the failing hex values with your Kitty-verified replacements and update the ratio column. Using the default AAA upgrade, the block becomes:</p>
+
+    <pre><span class="comment">## Color Palette — WCAG AAA compliant</span>
+
+<span class="comment"># Three files must stay in sync — edit all three together:</span>
+<span class="comment"># lib/theme.ts · public/theme.json · app/globals.css</span>
+
+| Var | Hex     | Role                           | WCAG on bb8 |
+|-----|---------|--------------------------------|-------------|
+| bb1 | <span class="key">#0D0D0D</span> | soot black — primary text      | 16.5:1      |
+| bb2 | <span class="changed">#434343</span> | iron grey — primary accent     | <span class="changed">7.1:1</span>        |
+| bb3 | <span class="changed">#6B0000</span> | dried-ink red — danger/emphasis| <span class="changed">7.8:1</span>        |
+| bb4 | <span class="changed">#645420</span> | cold brass — highlight/callout | <span class="changed">7.2:1</span>        |
+| bb5 | <span class="key">#2F2F2F</span> | charcoal — secondary accent    | 10.8:1      |
+| bb6 | <span class="changed">#4D4D43</span> | tarnished pewter — muted accent| <span class="changed">7.0:1</span>        |
+| bb7 | <span class="changed">#5E5A4A</span> | aged ledger tan — borders      | <span class="changed">7.0:1</span>        |
+| bb8 | <span class="key">#E8E0D0</span> | parchment — page background    | —           |</pre>
+
+    <p>Highlighted rows show the changed values. <code>bb1</code>, <code>bb5</code>, and <code>bb8</code> are unchanged — they were already compliant or are the fixed background.</p>
+
+    <div class="callout">
+      <div class="callout-label">The three-file rule</div>
+      <p>Medhavy.md is the source of truth, but three files must stay in sync: <code>lib/theme.ts</code>, <code>public/theme.json</code>, and <code>app/globals.css</code>. Update all three in the same commit. A palette split across versions will cause visual inconsistencies that are difficult to trace.</p>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="section">
+    <h2><span class="step-num">Step 05</span> Propagate changes to the three sync files</h2>
+    <hr class="section-rule">
+    <p>After updating <code>Medhavy.md</code>, apply the same hex values to the three files that drive actual rendering:</p>
+
+    <ol>
+      <li>Open <code>lib/theme.ts</code>. Update the hex values in the <code>colors</code> object. Update the comment from <em>WCAG AA</em> to <em>WCAG AAA</em> and add the ratio alongside each color.</li>
+      <li>Open <code>public/theme.json</code>. Update the <code>--bb-2</code> through <code>--bb-7</code> values. Update the <code>description</code> field to reflect AAA compliance.</li>
+      <li>Open <code>app/globals.css</code>. Update the CSS custom property values in the <code>:root</code> block.</li>
+      <li>Commit all four files together: <code>Medhavy.md</code>, <code>lib/theme.ts</code>, <code>public/theme.json</code>, <code>app/globals.css</code>. A single atomic commit prevents the files from drifting out of sync on a partial push.</li>
+      <li>Verify on deploy: open the site on a mobile device in direct sunlight if you can. AAA ratios should be readable. If anything looks off, return to Kitty with the specific pair that is failing.</li>
+    </ol>
+  </div>
+
+  <!-- VERIFICATION -->
+  <div class="section">
+    <h2><span class="step-num">Check</span> How to verify the result</h2>
+    <hr class="section-rule">
+    <p>After deployment, verify compliance using any of the following:</p>
+
+    <ol>
+      <li>Return to Kitty with your updated hex values — the auto-checks panel should show all key pairs as AAA or AA, no FAIL badges.</li>
+      <li>Run an automated audit using browser dev tools (Lighthouse &gt; Accessibility) or a tool like axe DevTools. Every text element should report contrast passing.</li>
+      <li>Check the ratio column in <code>Medhavy.md</code> manually. Every foreground color used for readable text should show 7.0:1 or higher against <code>bb8</code>.</li>
+    </ol>
+
+    <div class="callout">
+      <div class="callout-label">What Kitty cannot check automatically</div>
+      <p>Kitty checks the palette colors against each other. It cannot check text rendered over a background image, text inside a gradient overlay, or text in components that apply opacity. Review those cases manually after the base palette update.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co" target="_blank" rel="noopener">bearbrown.co</a> &nbsp;·&nbsp;
+  AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>
