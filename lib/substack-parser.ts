@@ -55,6 +55,20 @@ function parseCSVLine(line: string): string[] {
   return fields
 }
 
+/**
+ * Strip Substack subscribe/share widgets from body-only HTML.
+ * The exported HTML files have no <html>/<head>/<body> wrapper —
+ * just the post content with occasional subscribe CTAs.
+ */
+function stripSubscribeWidgets(html: string): string {
+  return html
+    .replace(/<div[^>]*class="[^"]*\bsubscription-widget\b[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '')
+    .replace(/<div[^>]*class="[^"]*\bsubscribe-widget\b[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '')
+    .replace(/<p[^>]*class="[^"]*\bbutton-wrapper\b[^"]*"[^>]*>[\s\S]*?<\/p>/gi, '')
+    .replace(/<a[^>]*class="[^"]*\bsubscribe-btn\b[^"]*"[^>]*>[\s\S]*?<\/a>/gi, '')
+    .trim()
+}
+
 export function parseSubstackZip(buffer: Buffer): ParsedPost[] {
   const zip = new AdmZip(buffer)
   const entries = zip.getEntries()
@@ -77,17 +91,20 @@ export function parseSubstackZip(buffer: Buffer): ParsedPost[] {
   const titleIdx = headers.indexOf('title')
   const subtitleIdx = headers.indexOf('subtitle')
   const postDateIdx = headers.indexOf('post_date')
+  const postIdIdx = headers.indexOf('post_id')
   const urlIdx = headers.indexOf('post_url') !== -1 ? headers.indexOf('post_url') : headers.indexOf('url')
   const slugIdx = headers.indexOf('slug')
   const typeIdx = headers.indexOf('type')
   const isPublishedIdx = headers.indexOf('is_published')
 
-  // Build a map of HTML files by name
+  // Build a map of HTML files keyed by base filename (without .html)
+  // Substack exports HTML as body-only content — no <html>/<head>/<body> wrapper
   const htmlMap = new Map<string, string>()
   for (const entry of entries) {
     if (entry.entryName.endsWith('.html')) {
       const name = entry.entryName.split('/').pop()!.replace('.html', '')
-      htmlMap.set(name, entry.getData().toString('utf-8'))
+      const rawHtml = entry.getData().toString('utf-8')
+      htmlMap.set(name, stripSubscribeWidgets(rawHtml))
     }
   }
 
@@ -109,10 +126,15 @@ export function parseSubstackZip(buffer: Buffer): ParsedPost[] {
     const postDate = postDateIdx >= 0 ? fields[postDateIdx]?.trim() || '' : ''
     const url = urlIdx >= 0 ? fields[urlIdx]?.trim() || '' : ''
 
-    // Derive slug from CSV slug column, URL, or title
+    // post_id format: "186459709.the-collapse-of-traditional-resume"
+    // HTML filename matches post_id exactly; slug is everything after the first dot
+    const postId = postIdIdx >= 0 ? fields[postIdIdx]?.trim() || '' : ''
+
     let slug = ''
     if (slugIdx >= 0 && fields[slugIdx]?.trim()) {
       slug = fields[slugIdx].trim()
+    } else if (postId && postId.includes('.')) {
+      slug = postId.substring(postId.indexOf('.') + 1)
     } else if (url) {
       const parts = url.split('/')
       slug = parts[parts.length - 1] || slugify(title)
@@ -120,8 +142,14 @@ export function parseSubstackZip(buffer: Buffer): ParsedPost[] {
       slug = slugify(title)
     }
 
-    // Find matching HTML content
-    const content = htmlMap.get(slug) || ''
+    // Match HTML file: try post_id (exact match to filename), then slug-based fallback
+    let content = ''
+    if (postId) {
+      content = htmlMap.get(postId) || ''
+    }
+    if (!content) {
+      content = htmlMap.get(slug) || ''
+    }
 
     // Build excerpt from content
     const plainText = stripHtml(content)
