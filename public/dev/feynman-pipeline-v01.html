@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feynman pipeline — system architecture v0.1</title>
+  <meta name="description" content="Architecture design document for the Feynman Manim video generation pipeline. Written for developers evaluating AWS infrastructure options. Covers pipeline stages, AWS component recommendations, JSON scene schema, and open decisions required before v0.2.">
+  <meta name="keywords" content="Feynman, Manim, physics video, AWS ECS, pipeline architecture, physics animation, scene JSON, video library, bearbrown, Indiana">
+
+  <style>
+    :root {
+      --bb-1: #1a0a00;
+      --bb-2: #8B3A0F;
+      --bb-3: #C0392B;
+      --bb-4: #E8A020;
+      --bb-5: #D4500A;
+      --bb-6: #B8860B;
+      --bb-7: #C8A96E;
+      --bb-8: #F0E6D0;
+
+      --font-body: Georgia, 'Times New Roman', serif;
+      --font-mono: 'Courier New', Courier, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bb-8);
+      color: var(--bb-1);
+      line-height: 1.75;
+      padding: 0;
+    }
+
+    /* ── HEADER ── */
+    .doc-header {
+      background: var(--bb-1);
+      color: var(--bb-8);
+      padding: 48px 40px 36px;
+      border-bottom: 4px solid var(--bb-2);
+    }
+
+    .doc-header .doc-type {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--bb-4);
+      margin-bottom: 12px;
+    }
+
+    .doc-header h1 {
+      font-size: 2rem;
+      font-weight: normal;
+      color: var(--bb-8);
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .doc-header .subtitle {
+      font-size: 0.9rem;
+      color: var(--bb-7);
+      font-style: italic;
+      margin-bottom: 24px;
+    }
+
+    .version-meta {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      background: var(--bb-2);
+      color: var(--bb-8);
+      padding: 4px 12px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── LAYOUT ── */
+    .doc-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 40px 64px;
+    }
+
+    /* ── TYPOGRAPHY ── */
+    h2 {
+      font-size: 1.25rem;
+      font-weight: normal;
+      color: var(--bb-2);
+      border-bottom: 2px solid var(--bb-7);
+      padding-bottom: 6px;
+      margin: 48px 0 18px;
+      letter-spacing: 0.02em;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--bb-5);
+      margin: 28px 0 10px;
+      letter-spacing: 0.03em;
+    }
+
+    p { margin-bottom: 16px; }
+
+    ul, ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+
+    li { margin-bottom: 8px; }
+
+    strong { color: var(--bb-2); }
+
+    /* ── PIPELINE DIAGRAM ── */
+    .pipeline {
+      background: var(--bb-1);
+      color: var(--bb-8);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 28px 32px;
+      border-radius: 2px;
+      margin: 24px 0;
+      line-height: 2;
+      overflow-x: auto;
+    }
+
+    .pipeline .stage-label {
+      color: var(--bb-4);
+    }
+
+    .pipeline .arrow {
+      color: var(--bb-7);
+    }
+
+    /* ── DECISION TABLE ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0 28px;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: var(--bb-2);
+      color: var(--bb-8);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: normal;
+      letter-spacing: 0.04em;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--bb-7);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: rgba(200, 169, 110, 0.12); }
+
+    td.verdict-rec { color: var(--bb-2); font-weight: bold; }
+    td.verdict-no  { color: var(--bb-3); }
+    td.verdict-alt { color: var(--bb-6); }
+
+    /* ── CALLOUT BOXES ── */
+    .callout {
+      border-left: 4px solid var(--bb-4);
+      background: rgba(232, 160, 32, 0.08);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+    }
+
+    .callout.danger {
+      border-left-color: var(--bb-3);
+      background: rgba(192, 57, 43, 0.07);
+    }
+
+    .callout.info {
+      border-left-color: var(--bb-6);
+      background: rgba(184, 134, 11, 0.07);
+    }
+
+    .callout-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--bb-4);
+      font-family: var(--font-mono);
+      margin-bottom: 6px;
+    }
+
+    .callout.danger .callout-label { color: var(--bb-3); }
+    .callout.info   .callout-label { color: var(--bb-6); }
+
+    /* ── CODE / SCHEMA ── */
+    pre {
+      background: var(--bb-1);
+      color: #d4c5a9;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 24px 28px;
+      overflow-x: auto;
+      border-radius: 2px;
+      margin: 16px 0 24px;
+      line-height: 1.7;
+    }
+
+    .json-key   { color: var(--bb-4); }
+    .json-str   { color: #a8d8a8; }
+    .json-num   { color: #f0c070; }
+    .json-bool  { color: var(--bb-5); }
+    .json-comment { color: #777; font-style: italic; }
+
+    /* ── OPEN QUESTIONS ── */
+    .open-questions {
+      background: var(--bb-1);
+      color: var(--bb-8);
+      padding: 28px 32px;
+      border-radius: 2px;
+      margin: 24px 0;
+    }
+
+    .open-questions h3 {
+      color: var(--bb-4);
+      margin-top: 0;
+      margin-bottom: 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .open-questions ol {
+      padding-left: 20px;
+    }
+
+    .open-questions li {
+      color: var(--bb-7);
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .open-questions li strong {
+      color: var(--bb-4);
+    }
+
+    /* ── SECTION DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--bb-7);
+      margin: 40px 0;
+    }
+
+    /* ── COMPONENT CARD ── */
+    .component-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 640px) {
+      .component-grid { grid-template-columns: 1fr; }
+      .doc-body { padding: 32px 20px 48px; }
+      .doc-header { padding: 32px 20px 24px; }
+    }
+
+    .component-card {
+      border: 1px solid var(--bb-7);
+      padding: 16px 18px;
+      background: rgba(240, 230, 208, 0.5);
+    }
+
+    .component-card .card-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--bb-6);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .component-card h4 {
+      font-size: 0.95rem;
+      color: var(--bb-2);
+      margin-bottom: 8px;
+    }
+
+    .component-card p {
+      font-size: 0.85rem;
+      margin: 0;
+      line-height: 1.55;
+      color: var(--bb-1);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 11px;
+      color: #999;
+      border-top: 1px solid var(--bb-7);
+      margin-top: 40px;
+    }
+
+    footer a {
+      color: #999;
+      text-decoration: none;
+    }
+
+    footer a:hover { color: var(--bb-2); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<header class="doc-header">
+  <div class="doc-type">System Architecture · Explanation Doc</div>
+  <h1>Feynman pipeline — system architecture</h1>
+  <p class="subtitle">From physics text to rendered Manim video on AWS — how the components fit, what each does, and what is not yet decided</p>
+  <div class="version-meta">Version 0.1 &nbsp;·&nbsp; March 2026 &nbsp;·&nbsp; Reviewed by Dev the Dev</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ BODY -->
+<main class="doc-body">
+
+  <!-- ── WHAT THIS DOC IS ── -->
+  <h2>What this document is</h2>
+
+  <p>This is a v0.1 architecture design document. Its purpose is to put the system on paper so developers can evaluate the approach, flag problems, and confirm or change the decisions before any code is written.</p>
+
+  <p>It does not contain deployment steps, code, or a working spec. Those are v0.2 artefacts. This document exists to answer one question: <strong>do we agree on what we are building and how the pieces connect?</strong></p>
+
+  <div class="callout">
+    <div class="callout-label">Primary reader</div>
+    Developer evaluating the pipeline design. Physics expert reviewing the feedback loop. No prior bearbrown system knowledge assumed.
+  </div>
+
+  <div class="callout info">
+    <div class="callout-label">Doc type note</div>
+    This is a Diátaxis <strong>explanation</strong> document — it builds a mental model, not a task list. The how-to guides (deployment, schema implementation, feedback loop protocol) are separate docs, written after this one is confirmed.
+  </div>
+
+
+  <!-- ── SYSTEM OVERVIEW ── -->
+  <h2>System overview</h2>
+
+  <p>The Feynman pipeline converts physics text into a library of Manim-rendered videos suitable for embedding in a physics book. It runs in two parallel tracks that share a backend:</p>
+
+  <ul>
+    <li><strong>Track A — Zone identification:</strong> the existing Feynman HTML tool. Runs in the browser. Identifies where in a physics text a visual intervention is needed and what kind.</li>
+    <li><strong>Track B — Video generation:</strong> the new pipeline described in this document. Takes zone data from Track A, generates Manim Python, renders it on AWS, and stores the result in a video library with searchable metadata.</li>
+  </ul>
+
+  <p>The two tracks are connected by a JSON scene spec — a structured object that carries everything Track B needs to generate and render a video without any further human input.</p>
+
+  <div class="pipeline">
+<span class="stage-label">BROWSER</span>
+    Physics text
+    <span class="arrow">→</span> Feynman tool (existing HTML)
+    <span class="arrow">→</span> Zone detection output
+
+<span class="stage-label">HANDOFF</span>
+    Zone output
+    <span class="arrow">→</span> "Generate video" action
+    <span class="arrow">→</span> JSON scene spec (defined below)
+
+<span class="stage-label">AWS BACKEND</span>
+    JSON scene spec
+    <span class="arrow">→</span> Claude API call (generates Manim Python)
+    <span class="arrow">→</span> ECS/Fargate task (executes Python, renders video)
+    <span class="arrow">→</span> S3 (stores video + metadata)
+
+<span class="stage-label">REVIEW LOOP</span>
+    Render result
+    <span class="arrow">→</span> Dev checks: does it run?
+    <span class="arrow">→</span> Physics expert checks: is it accurate?
+    <span class="arrow">→</span> Patch → re-render → library
+  </div>
+
+
+  <!-- ── AWS ARCHITECTURE ── -->
+  <h2>AWS architecture — recommendation and rationale</h2>
+
+  <p>Three options were considered. The recommendation is <strong>ECS/Fargate with a containerised Manim environment</strong>. The reasoning is below. Developers should flag disagreements in v0.2.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Verdict</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Lambda</strong></td>
+        <td class="verdict-no">Not recommended</td>
+        <td>Manim requires Python, Cairo, ffmpeg, and LaTeX. The combined dependency size exceeds Lambda's layer limits. The 15-minute execution timeout is a real constraint for complex animations. Cold start latency is unsuitable for a review loop that expects fast feedback.</td>
+      </tr>
+      <tr>
+        <td><strong>EC2 (persistent instance)</strong></td>
+        <td class="verdict-alt">Acceptable fallback</td>
+        <td>Simpler to set up. Dev SSHs in to check renders. No container overhead. The tradeoff: you are paying for a running instance even when idle, and horizontal scaling requires manual AMI management. Suitable if render volume is low and the team is small.</td>
+      </tr>
+      <tr>
+        <td><strong>ECS / Fargate</strong></td>
+        <td class="verdict-rec">Recommended</td>
+        <td>Manim + ffmpeg + LaTeX ship cleanly in a Docker image. Fargate tasks spin up on demand and stop when done — no idle cost. Scales horizontally without manual intervention. The official Manim Docker image exists and is maintained. This is the correct environment for a render pipeline that will grow.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout danger">
+    <div class="callout-label">Open decision — developer must confirm</div>
+    ECS/Fargate is the recommendation, but the developer needs to evaluate it against actual AWS account permissions, budget constraints, and whether the team has Docker/ECS experience. This decision gates all subsequent infrastructure work.
+  </div>
+
+  <h3>Supporting components</h3>
+
+  <div class="component-grid">
+    <div class="component-card">
+      <div class="card-label">API layer</div>
+      <h4>API Gateway + Lambda trigger</h4>
+      <p>A lightweight Lambda function receives the JSON scene spec from the browser tool and queues an ECS task. Lambda is not running Manim — it is only a trigger and message router.</p>
+    </div>
+    <div class="component-card">
+      <div class="card-label">AI generation</div>
+      <h4>Claude API (Anthropic)</h4>
+      <p>Called from inside the ECS task. Receives the JSON scene spec, returns runnable Manim Python. The Claude API key is stored in AWS Secrets Manager, not in source code.</p>
+    </div>
+    <div class="component-card">
+      <div class="card-label">Render environment</div>
+      <h4>ECS / Fargate task</h4>
+      <p>Runs the Manim Docker container. Executes the generated Python. Captures stdout/stderr for the dev review step. Writes the rendered video to S3.</p>
+    </div>
+    <div class="component-card">
+      <div class="card-label">Storage</div>
+      <h4>S3 video library</h4>
+      <p>Stores rendered .mp4 files alongside a JSON metadata file per video. Bucket structure mirrors the library schema (see below). Videos are accessible by the Indiana system via public URLs or signed URLs.</p>
+    </div>
+    <div class="component-card">
+      <div class="card-label">Queue</div>
+      <h4>SQS (optional)</h4>
+      <p>If render volume grows, an SQS queue between the API trigger and ECS prevents task pile-up. Not required for v0.1 testing — add when needed.</p>
+    </div>
+    <div class="component-card">
+      <div class="card-label">Logging</div>
+      <h4>CloudWatch</h4>
+      <p>ECS task logs (including Manim render output and errors) stream to CloudWatch. The dev review step reads these logs to determine if the render succeeded or failed.</p>
+    </div>
+  </div>
+
+
+  <!-- ── JSON SCENE SPEC ── -->
+  <h2>JSON scene spec — preliminary schema</h2>
+
+  <p>This is the data contract between Track A (zone detection) and Track B (video generation). Every field listed here is a <strong>proposal</strong> — developers and the physics expert should challenge anything that does not serve the pipeline.</p>
+
+  <p>The scene spec is generated by the Feynman browser tool when the user requests video generation for a flagged zone. It is passed to the AWS backend as a POST request body.</p>
+
+<pre><code>{
+  <span class="json-key">"scene_id"</span>:         <span class="json-str">"feynman_scene_001"</span>,         <span class="json-comment">// unique ID for library lookup</span>
+  <span class="json-key">"version"</span>:          <span class="json-str">"0.1"</span>,
+  <span class="json-key">"created_at"</span>:       <span class="json-str">"2026-03-24T10:00:00Z"</span>,
+
+  <span class="json-key">"source"</span>: {
+    <span class="json-key">"text_quote"</span>:      <span class="json-str">"As the electron enters the magnetic field..."</span>,
+    <span class="json-key">"text_context"</span>:    <span class="json-str">"Chapter 12: Electromagnetism, section 3"</span>,
+    <span class="json-key">"book_id"</span>:         <span class="json-str">"physics_101"</span>              <span class="json-comment">// ties video to a specific book</span>
+  },
+
+  <span class="json-key">"zone"</span>: {
+    <span class="json-key">"heuristic"</span>:       <span class="json-str">"TD"</span>,                       <span class="json-comment">// TD | SG | QR | SC</span>
+    <span class="json-key">"intervention"</span>:    <span class="json-str">"MANIM_ANIMATION"</span>,
+    <span class="json-key">"priority"</span>:        <span class="json-str">"Critical"</span>                 <span class="json-comment">// Critical | Important | Supplementary</span>
+  },
+
+  <span class="json-key">"animation"</span>: {
+    <span class="json-key">"what_to_show"</span>:    <span class="json-str">"Electron path curving in uniform B field. Show velocity vector, force vector, circular orbit forming."</span>,
+    <span class="json-key">"manim_notes"</span>:    <span class="json-str">"Start with stationary field lines. Introduce electron moving right. Show Lorentz force arrow deflecting path upward. Complete the circular orbit. Label v, F, B throughout."</span>,
+    <span class="json-key">"duration_hint"</span>:  <span class="json-num">30</span>,                         <span class="json-comment">// seconds — hint only, Claude may adjust</span>
+    <span class="json-key">"complexity"</span>:     <span class="json-str">"medium"</span>                   <span class="json-comment">// low | medium | high — affects render time</span>
+  },
+
+  <span class="json-key">"library"</span>: {
+    <span class="json-key">"topic"</span>:           <span class="json-str">"electromagnetism"</span>,
+    <span class="json-key">"subtopic"</span>:        <span class="json-str">"Lorentz force"</span>,
+    <span class="json-key">"keywords"</span>:       [<span class="json-str">"electron"</span>, <span class="json-str">"magnetic field"</span>, <span class="json-str">"Lorentz force"</span>, <span class="json-str">"circular motion"</span>],
+    <span class="json-key">"level"</span>:           <span class="json-str">"undergraduate"</span>            <span class="json-comment">// high_school | undergraduate | graduate</span>
+  },
+
+  <span class="json-key">"status"</span>: {
+    <span class="json-key">"render_state"</span>:   <span class="json-str">"pending"</span>,                 <span class="json-comment">// pending | rendered | dev_approved | expert_approved | published</span>
+    <span class="json-key">"dev_notes"</span>:      <span class="json-str">""</span>,
+    <span class="json-key">"expert_notes"</span>:   <span class="json-str">""</span>,
+    <span class="json-key">"iteration"</span>:      <span class="json-num">1</span>                          <span class="json-comment">// increments on each patch cycle</span>
+  }
+}</code></pre>
+
+  <div class="callout info">
+    <div class="callout-label">Schema note</div>
+    The <code>status</code> block is the review loop in structured form. <code>render_state</code> tracks where in the pipeline a video sits. The dev checks <code>rendered</code>. The physics expert checks <code>dev_approved</code>. <code>expert_approved</code> means the video is ready to publish to the library.
+  </div>
+
+
+  <!-- ── REVIEW LOOP ── -->
+  <h2>The review loop — how feedback flows</h2>
+
+  <p>The review loop is a two-gate system. Neither gate is automated in v0.1. Both require human judgment.</p>
+
+  <h3>Gate 1 — Dev review (technical)</h3>
+  <p>The ECS task logs (CloudWatch) show whether the Manim Python executed without errors and whether a video file was produced in S3. The developer is answering one question: <strong>does it run?</strong> Not whether it is physically accurate — that is Gate 2.</p>
+
+  <p>If the render fails, the developer patches the Python and re-triggers the ECS task. The scene spec's <code>iteration</code> field increments. The patched Python is stored alongside the spec for audit purposes.</p>
+
+  <h3>Gate 2 — Physics expert review (accuracy)</h3>
+  <p>The physics expert watches the rendered video and answers one question: <strong>is this physically correct?</strong> Not whether it looks good — whether the motion, vectors, labels, and relationships accurately represent the underlying physics.</p>
+
+  <p>Feedback is written into <code>expert_notes</code> in plain language. The developer translates that feedback into Manim changes. The physics expert does not write code.</p>
+
+  <div class="callout danger">
+    <div class="callout-label">Workflow gap — needs a UI</div>
+    In v0.1 both gates are manual — developers read CloudWatch logs, physics experts watch S3 videos directly. This is acceptable for testing on a single scene. It is not acceptable at library scale. A review UI (even a simple HTML page listing pending videos with status controls) is a v0.2 requirement.
+  </div>
+
+
+  <!-- ── VIDEO LIBRARY ── -->
+  <h2>Video library — S3 structure and metadata</h2>
+
+  <p>The video library is an S3 bucket with a predictable folder structure. Each video has a companion <code>.json</code> metadata file in the same folder. The Indiana system will be trained to find and embed videos using the library schema.</p>
+
+<pre><code>s3://feynman-library/
+  └── physics_101/
+        └── electromagnetism/
+              └── lorentz-force/
+                    ├── feynman_scene_001.mp4
+                    ├── feynman_scene_001.json    <span class="json-comment">// the scene spec, status: published</span>
+                    └── feynman_scene_001_v1.py   <span class="json-comment">// the Manim source, version-controlled</span></code></pre>
+
+  <p>The <code>.json</code> file stored with the video is the same scene spec object defined above, updated to reflect final status and any review notes. This means the library is self-documenting — every video carries its own provenance, edit history, and metadata for search.</p>
+
+
+  <!-- ── WHAT IS NOT IN THIS DOC ── -->
+  <h2>What this document does not cover</h2>
+
+  <p>The following are explicitly deferred to v0.2 and later. They are listed here so they are not forgotten:</p>
+
+  <ul>
+    <li><strong>Claude prompt design</strong> — the system prompt that instructs Claude to generate Manim Python from a scene spec. This requires testing on real physics scenes before it can be specified.</li>
+    <li><strong>Manim Docker image specification</strong> — which base image, which Manim version, what additional LaTeX packages are required.</li>
+    <li><strong>IAM roles and security policy</strong> — least-privilege access for ECS task role, S3 bucket policy, Secrets Manager permissions.</li>
+    <li><strong>Error handling</strong> — what happens when Claude generates unrunnable Python, when a render exceeds a timeout, when S3 upload fails.</li>
+    <li><strong>Review UI</strong> — the HTML interface for dev and expert review workflow.</li>
+    <li><strong>Indiana integration</strong> — how the Indiana build system finds and embeds library videos in HTML output.</li>
+    <li><strong>Cost model</strong> — ECS/Fargate per-task pricing, S3 storage, Claude API costs per video.</li>
+  </ul>
+
+
+  <!-- ── OPEN QUESTIONS ── -->
+  <div class="open-questions">
+    <h3>Open decisions — developer response required before v0.2</h3>
+    <ol>
+      <li><strong>ECS/Fargate vs EC2:</strong> Does the team have Docker/ECS experience? Is there an existing AWS account with ECS enabled? If not, EC2 is the fallback — but confirm now.</li>
+      <li><strong>Claude API key management:</strong> Is the key stored in AWS Secrets Manager, or is there an existing key management pattern in the bearbrown infrastructure?</li>
+      <li><strong>S3 bucket access:</strong> Will rendered videos be publicly accessible URLs or signed URLs? This affects how Indiana embeds them in HTML output.</li>
+      <li><strong>Review UI:</strong> Is a simple HTML review page acceptable for v0.2, or does this need to integrate with an existing workflow tool?</li>
+      <li><strong>Manim version:</strong> Which version of Manim? Community edition (ManimCE) is recommended — confirm the physics expert or a developer has run it locally before we commit to a Docker image.</li>
+      <li><strong>Scene spec generation:</strong> In v0.1 the scene spec is assembled by the Feynman browser tool. Should the developer also be able to write scene specs manually, bypassing the browser tool? This affects schema strictness.</li>
+    </ol>
+  </div>
+
+
+  <!-- ── V0.2 SCOPE ── -->
+  <h2>What v0.2 will contain</h2>
+
+  <p>Once the open decisions above are resolved, v0.2 will be a set of three operational documents:</p>
+
+  <ol>
+    <li><strong>Deployment guide</strong> (how-to) — step-by-step setup of the AWS environment, Docker image build, ECS task definition, S3 bucket policy.</li>
+    <li><strong>Scene spec reference</strong> (reference) — final locked schema with field definitions, allowed values, and examples for each heuristic type.</li>
+    <li><strong>Review loop protocol</strong> (how-to) — instructions for the developer and physics expert on how to move a video from <code>pending</code> to <code>published</code>.</li>
+  </ol>
+
+  <p>v0.2 docs are written after the first test render succeeds on a single physics scene. Do not write deployment docs for a system that has not been tested.</p>
+
+  <hr class="divider">
+
+  <p style="font-size:0.85rem; color: var(--bb-6); font-style: italic;">This document is intentionally incomplete. It is a structured starting point, not a finished specification. Every section marked as an open decision is a blocker for v0.2. The goal of v0.1 is agreement, not completeness.</p>
+
+</main>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co" target="_blank" rel="noopener">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>
