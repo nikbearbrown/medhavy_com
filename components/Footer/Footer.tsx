@@ -14,7 +14,7 @@ export default function Footer() {
   return (
     <footer className="w-full border-t bg-background">
       <div className="container px-4 md:px-6 mx-auto py-10">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Company Info */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">Medhavy AI, LLC</h3>
@@ -52,6 +52,19 @@ export default function Footer() {
               <Link href="/tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Tools
               </Link>
+            </div>
+          </div>
+
+          {/* Members */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold">Members</h3>
+            <div className="flex flex-col gap-2">
+              <a href="https://www.nikbearbrown.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Nik Bear Brown
+              </a>
+              <a href="https://srinivassridhar.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Srinivas Sridhar
+              </a>
             </div>
           </div>
 
