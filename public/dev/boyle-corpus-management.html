@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotebookLM corpus management guide — source ingestion, Ouroboros technique, and notebook segmentation</title>
+  <meta name="description" content="Operational reference for researchers and team leads managing NotebookLM corpora within the Boyle System. Covers source format performance, the Ouroboros note-to-source conversion technique, source stitching strategies, and notebook segmentation taxonomy. After reading, you can structure and maintain a NotebookLM corpus that maximizes retrieval quality and stays within platform limits.">
+  <meta name="keywords" content="NotebookLM, corpus management, RAG, source ingestion, Ouroboros technique, source stitching, notebook segmentation, retrieval quality, Boyle System, document management, 50-source limit, citation preservation">
+  <style>
+    :root {
+      --bb-1: #1a0a00;
+      --bb-2: #8B3A0F;
+      --bb-3: #C0392B;
+      --bb-4: #E8A020;
+      --bb-5: #D4500A;
+      --bb-6: #B8860B;
+      --bb-7: #C8A96E;
+      --bb-8: #F0E6D0;
+    }
+
+    @media print {
+      .page-break { page-break-before: always; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .no-print { display: none; }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: var(--bb-1);
+      background: #fff;
+      font-size: 10pt;
+    }
+
+    .doc-nav {
+      background: var(--bb-1);
+      padding: 10px 20px;
+      font-size: 8.5pt;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .doc-nav strong { color: var(--bb-4); margin-right: 6px; }
+    .doc-nav a { color: var(--bb-7); text-decoration: none; opacity: 0.8; }
+    .doc-nav a:hover { color: var(--bb-4); opacity: 1; }
+    .doc-nav a.active { color: var(--bb-4); font-weight: 600; opacity: 1; }
+
+    .cover {
+      min-height: 60vh;
+      background: linear-gradient(135deg, var(--bb-1) 0%, var(--bb-2) 55%, var(--bb-1) 100%);
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; text-align: center; color: white; padding: 40px;
+    }
+    .cover .badge {
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+      padding: 7px 20px; border-radius: 20px; font-size: 9pt; font-weight: 700;
+      margin-bottom: 30px; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .cover .doc-type {
+      background: var(--bb-4); color: var(--bb-1); padding: 4px 14px;
+      border-radius: 12px; font-size: 8.5pt; font-weight: 700; margin-bottom: 16px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .cover h1 { font-size: 28pt; font-weight: 700; margin-bottom: 8px; font-family: 'Consolas', monospace; letter-spacing: 2px; }
+    .cover .subtitle { font-size: 12pt; opacity: 0.85; margin-bottom: 20px; }
+    .cover p.lead { max-width: 580px; opacity: 0.8; font-size: 10.5pt; }
+    .cover-meta { font-size: 9pt; opacity: 0.6; margin-top: 40px; line-height: 1.8; }
+
+    .version-meta {
+      font-size: 9pt; color: var(--bb-6); text-align: center;
+      padding: 8px 16px; background: var(--bb-8); border-radius: 4px;
+      margin: 24px 0; font-family: 'Consolas', monospace; border-left: 3px solid var(--bb-6);
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 30px 40px; }
+
+    h1.section-title {
+      font-size: 17pt; color: var(--bb-1); border-bottom: 3px solid var(--bb-2);
+      padding-bottom: 8px; margin: 35px 0 20px 0; font-family: 'Consolas', monospace;
+    }
+    h2 { font-size: 13pt; color: var(--bb-2); margin: 28px 0 12px 0; border-left: 4px solid var(--bb-2); padding-left: 12px; }
+    h3 { font-size: 11pt; color: var(--bb-2); margin: 20px 0 10px 0; }
+    p { margin: 10px 0; }
+
+    code {
+      background: var(--bb-8); padding: 2px 6px; border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace; font-size: 9pt; color: var(--bb-2);
+    }
+
+    pre {
+      background: var(--bb-1); color: var(--bb-7); padding: 15px;
+      border-radius: 6px; overflow-x: auto; font-size: 9pt;
+      margin: 12px 0; font-family: 'Consolas', monospace;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 9pt; }
+    th { background: var(--bb-1); color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--bb-7); vertical-align: top; }
+    tr:nth-child(even) { background: var(--bb-8); }
+
+    .alert { padding: 15px 18px; border-radius: 6px; margin: 15px 0; }
+    .alert-info    { background: var(--bb-8); border-left: 4px solid var(--bb-2); color: var(--bb-2); }
+    .alert-warning { background: #fffbeb; border-left: 4px solid var(--bb-4); color: var(--bb-5); }
+    .alert-danger  { background: #fdf2f2; border-left: 4px solid var(--bb-3); color: var(--bb-3); }
+    .alert strong  { display: block; margin-bottom: 5px; }
+
+    .card {
+      border: 1px solid var(--bb-7); border-radius: 8px;
+      padding: 18px; margin: 15px 0; background: var(--bb-8);
+    }
+    .card-header { font-weight: 600; color: var(--bb-1); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--bb-7); }
+
+    .check   { color: var(--bb-4); font-weight: bold; }
+    .cross   { color: var(--bb-3); font-weight: bold; }
+    .partial { color: var(--bb-6); font-weight: bold; }
+
+    .notebook-card {
+      border: 1px solid var(--bb-7); border-radius: 8px;
+      padding: 14px 18px; margin: 10px 0; background: var(--bb-8);
+      border-left: 5px solid var(--bb-2);
+    }
+    .notebook-card.charter    { border-left-color: var(--bb-2); }
+    .notebook-card.active     { border-left-color: var(--bb-4); }
+    .notebook-card.literature { border-left-color: var(--bb-6); }
+    .notebook-card.handoff    { border-left-color: var(--bb-5); }
+    .notebook-card.failure    { border-left-color: var(--bb-3); }
+
+    .nb-label { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .notebook-card.charter    .nb-label { color: var(--bb-2); }
+    .notebook-card.active     .nb-label { color: var(--bb-4); }
+    .notebook-card.literature .nb-label { color: var(--bb-6); }
+    .notebook-card.handoff    .nb-label { color: var(--bb-5); }
+    .notebook-card.failure    .nb-label { color: var(--bb-3); }
+
+    ul, ol { margin: 10px 0 10px 20px; }
+    li { margin: 5px 0; }
+
+    .bb-footer {
+      text-align: center; padding: 20px; font-size: 11px;
+      color: #999; border-top: 1px solid var(--bb-7); margin-top: 40px;
+    }
+    .bb-footer a { color: #999; }
+
+    .doc-footer {
+      background: var(--bb-1); color: var(--bb-7); text-align: center;
+      padding: 28px; margin-top: 0; font-size: 9pt;
+    }
+    .doc-footer a { color: var(--bb-4); }
+  </style>
+</head>
+<body>
+
+<nav class="doc-nav no-print">
+  <strong>Boyle System Docs:</strong>
+  <a href="boyle-system-overview.html">Overview</a>
+  <a href="boyle-mval-reference.html">MVAL Reference</a>
+  <a href="boyle-corpus-management.html" class="active">Corpus Management</a>
+  <a href="boyle-adaptive-architecture.html">Adaptive Architecture</a>
+  <a href="boyle-deployment-guide.html">Deployment Guide</a>
+  <a href="boyle-roadmap.html">Roadmap</a>
+</nav>
+
+<div class="cover">
+  <div class="badge">📄 Reference — Boyle System Suite · Document 3 of 6</div>
+  <div class="doc-type">Reference</div>
+  <h1>CORPUS MANAGEMENT</h1>
+  <div class="subtitle">Source Ingestion, Ouroboros Technique &amp; Notebook Segmentation</div>
+  <p class="lead">
+    How to structure, maintain, and stay within the limits of a NotebookLM corpus.
+    For researchers and team leads managing active notebooks.
+  </p>
+  <div class="cover-meta">
+    <p>Version 1.1 | March 2026</p>
+    <p>Medhavy LLC &nbsp;|&nbsp; Bear Brown LLC &nbsp;|&nbsp; Humanitarians AI (501(c)(3))</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="version-meta">Version 1.1 | March 2026 | Reviewed by Dev the Dev</div>
+
+  <div class="alert alert-info">
+    <strong>What this reference covers</strong>
+    Source format performance, the 50-source ceiling and how to manage it, the Ouroboros note-to-source conversion workflow, source stitching strategies, and the five-notebook segmentation taxonomy. If you need to understand why corpus management matters structurally, see the <a href="boyle-system-overview.html">System Overview</a>.
+  </div>
+
+  <!-- PLATFORM LIMITS -->
+  <h1 class="section-title">Platform Limits — Know These Before You Ingest</h1>
+
+  <table>
+    <tr><th>Resource</th><th>Hard Limit</th><th>Management Strategy</th></tr>
+    <tr><td>Notebooks per account</td><td>100</td><td>Segment by project / domain / cohort (see §4)</td></tr>
+    <tr><td>Sources per notebook</td><td>50</td><td>Ouroboros technique + source stitching (see §2, §3)</td></tr>
+    <tr><td>Words per source</td><td>500,000</td><td>Stitching maximizes this — combine small PDFs into one</td></tr>
+    <tr><td>Total corpus per notebook</td><td>~25 million words</td><td>Equivalent to ~25 large technical monographs</td></tr>
+    <tr><td>Context window (Gemini 1.5 Pro)</td><td>1M tokens</td><td>Near-perfect recall (&gt;99.7%) up to this limit</td></tr>
+  </table>
+
+  <div class="alert alert-warning">
+    <strong>BD-001: Source Slot Ceiling</strong>
+    The 50-source limit is the primary operational constraint on long-running projects. At 40 sources, set an alert. At 45, begin Ouroboros conversion before you hit the ceiling under pressure. Never attempt Ouroboros at 50 — you will lose citation data. See <a href="boyle-roadmap.html">Roadmap AI-001</a>.
+  </div>
+
+  <!-- SOURCE FORMAT PERFORMANCE -->
+  <h1 class="section-title">Source Ingestion and Format Performance</h1>
+
+  <p>Not all source formats perform equally in NotebookLM's RAG pipeline. Retrieval quality depends on how cleanly the document can be chunked and vectorized. High-noise formats — visual-heavy PDFs, scanned documents — degrade retrieval precision.</p>
+
+  <table>
+    <tr>
+      <th>Format</th>
+      <th>Retrieval Quality</th>
+      <th>Technical Consideration</th>
+      <th>Recommendation</th>
+    </tr>
+    <tr>
+      <td>Markdown / Plain Text</td>
+      <td><span class="check">■■■■■</span> Highest</td>
+      <td>No layout noise; ideal for RAG chunking</td>
+      <td><strong>Primary target format.</strong> Convert everything you can.</td>
+    </tr>
+    <tr>
+      <td>Google Docs / Word</td>
+      <td><span class="check">■■■■</span> High</td>
+      <td>Structured formatting facilitates parsing</td>
+      <td>Acceptable. Export to Markdown for critical long-term sources.</td>
+    </tr>
+    <tr>
+      <td>Text-Based PDF</td>
+      <td><span class="partial">■■■</span> Strong</td>
+      <td>Multi-column layouts may cause chunking errors</td>
+      <td>Use. Convert to Markdown if passage retrieval is critical.</td>
+    </tr>
+    <tr>
+      <td>Scanned PDF</td>
+      <td><span class="partial">■■</span> Mixed</td>
+      <td>Sensitive to scan resolution and lighting</td>
+      <td>Apply OCR preprocessing before ingestion.</td>
+    </tr>
+    <tr>
+      <td>Handwritten Notes (OCR)</td>
+      <td><span class="cross">■</span> Variable</td>
+      <td>Cursive notation reduces reliability</td>
+      <td>Hybrid pipeline: OCR + Gemini self-correction pass.</td>
+    </tr>
+    <tr>
+      <td>Audio Overview (MP3)</td>
+      <td><span class="partial">■■</span> High abstraction</td>
+      <td>Multi-modal, conversational perspective</td>
+      <td>Track lineage carefully. Avoid multi-generation re-upload (see §2.3).</td>
+    </tr>
+    <tr>
+      <td>Website URLs</td>
+      <td><span class="partial">■■■</span> Variable</td>
+      <td>Dynamic content may not index correctly</td>
+      <td>Prefer static pages. Exclude dynamic URL patterns.</td>
+    </tr>
+  </table>
+
+  <!-- OUROBOROS -->
+  <h1 class="section-title">The Ouroboros Technique</h1>
+
+  <p>The Ouroboros technique converts accumulated AI-generated notes back into corpus sources, freeing slot capacity while preserving distilled knowledge. The name refers to the self-consuming quality of the cycle — the system feeds on its own outputs to compress and survive.</p>
+
+  <h2>When to run Ouroboros</h2>
+  <ul>
+    <li>Source slot count reaches 40 (set a monitoring alert at this threshold)</li>
+    <li>A research phase is complete and early working documents are no longer actively queried</li>
+    <li>A personnel handoff is approaching and knowledge needs to be distilled</li>
+  </ul>
+
+  <h2>Ouroboros workflow</h2>
+
+  <pre>
+OUROBOROS WORKFLOW
+
+Research Session 1–N
+      │
+      ▼
+Accumulated MVAL Entries + AI Responses (in NotebookLM Notes)
+      │
+      ▼  BEFORE CONVERTING: embed metadata manually (see step 2)
+"Convert to Source" → New Dense Source Document
+      │
+      ├─── ✓ Delete original bulky source files (slot freed)
+      │
+      └─── ✓ Verify: original citations are preserved in new source text</pre>
+
+  <h2>Step-by-step procedure</h2>
+
+  <ol>
+    <li><strong>Select notes for conversion.</strong> In the NotebookLM UI, select the notes accumulated since the last Ouroboros cycle.</li>
+    <li><strong>Embed citation metadata manually — before converting.</strong> Conversion strips inline citations. For every source referenced in those notes, manually add: original citation (author, date, document title), page numbers or section references, and the source's role in the corpus. This step is mandatory — skipping it means the citation data is permanently lost.</li>
+    <li><strong>Run "Convert to Source."</strong> NotebookLM generates a new source document from the selected notes.</li>
+    <li><strong>Delete the original sources</strong> that have now been distilled into the new source. This frees the slot count.</li>
+    <li><strong>Verify the new source.</strong> Query it for a specific passage from the original notes. Confirm the embedded metadata is retrievable.</li>
+  </ol>
+
+  <div class="alert alert-danger">
+    <strong>BD-002: Citation Loss on Ouroboros Conversion — CRITICAL</strong>
+    Converting notes to sources strips original inline citations automatically. This is not recoverable after conversion. Mandate: manually embed original citation metadata before every conversion, without exception. A mandatory pre-conversion checklist is in development. See <a href="boyle-roadmap.html">Roadmap AI-002</a>.
+  </div>
+
+  <h2>Audio Overview as Ouroboros input</h2>
+
+  <p>Re-uploading Audio Overview MP3s as corpus sources provides a multi-modal perspective and can surface connections the text-based corpus misses. However:</p>
+  <ul>
+    <li>Track generational lineage — know which generation each audio source represents</li>
+    <li>Do not re-upload audio generated from a previous audio source (multi-generation summaries accumulate errors)</li>
+    <li>Audio sources count against the 50-source limit the same as any other source</li>
+  </ul>
+
+  <!-- SOURCE STITCHING -->
+  <h1 class="section-title">Source Stitching</h1>
+
+  <p>Source stitching combines multiple small documents into a single large source file before upload. This bypasses the 50-source count limit by treating a collection of PDFs as one corpus entry rather than many.</p>
+
+  <table>
+    <tr><th>Strategy</th><th>Mechanism</th><th>Benefit</th><th>Risk</th></tr>
+    <tr>
+      <td>Source Stitching</td>
+      <td>Combining multiple PDFs into one file before upload</td>
+      <td>Bypasses the 50-source count limit; maximizes 500k-word-per-source capacity</td>
+      <td>Slightly slower retrieval for specific passages within a stitched document</td>
+    </tr>
+    <tr>
+      <td>Ouroboros (Note → Source)</td>
+      <td>Converting AI-generated notes into a new source document</td>
+      <td>Distills knowledge, compresses history, clears source slots</td>
+      <td>Loss of inline citations if metadata is not embedded before conversion</td>
+    </tr>
+    <tr>
+      <td>Audio as Source</td>
+      <td>Re-uploading Audio Overview MP3s as corpus sources</td>
+      <td>Multi-modal perspective; may surface cross-source connections</td>
+      <td>Creeping errors across generational summaries</td>
+    </tr>
+    <tr>
+      <td>Metadata Tagging</td>
+      <td>Including author, title, date in the text flow of each source</td>
+      <td>Improves citation accuracy and retrieval specificity</td>
+      <td>Manual overhead in document preparation</td>
+    </tr>
+    <tr>
+      <td>Notebook Segmentation</td>
+      <td>Splitting corpus by content type across multiple notebooks</td>
+      <td>64% retrieval improvement (benchmarked); prevents cross-domain noise</td>
+      <td>Requires disciplined categorization at ingestion time</td>
+    </tr>
+  </table>
+
+  <h2>When to stitch vs. when to segment</h2>
+
+  <ul>
+    <li><strong>Stitch</strong> when documents are the same type and domain — e.g., a set of academic papers on the same topic. Stitching keeps them in one notebook and saves source slots.</li>
+    <li><strong>Segment</strong> when documents serve different roles — research literature, project charters, MVAL logs, and failure archives should each live in their own notebook. Mixing them degrades retrieval quality for all of them.</li>
+  </ul>
+
+  <!-- NOTEBOOK SEGMENTATION -->
+  <h1 class="section-title">Notebook Segmentation Strategy</h1>
+
+  <p>A single notebook with all document types produces degraded retrieval quality across all queries — the system cannot distinguish which context is relevant for which question. The five-notebook taxonomy separates documents by role, not just by topic.</p>
+
+  <div class="notebook-card charter">
+    <div class="nb-label">📋 Notebook Type 1 — Project Charter Notebook</div>
+    <p><strong>Contents:</strong> Project charters, institutional standards, compliance protocols, team agreements, degree requirements.</p>
+    <p><strong>Rationale:</strong> Grounds the Tutor role in authoritative institutional context. Isolated from research data so guidance is always drawn from the governance layer, not contaminated by experimental results.</p>
+    <p><strong>Update frequency:</strong> Low. Update when standards or protocols change.</p>
+  </div>
+
+  <div class="notebook-card active">
+    <div class="nb-label">🔬 Notebook Type 2 — Active Research Notebook</div>
+    <p><strong>Contents:</strong> MVAL entries, experiment logs, pipeline documentation, session notes, working hypotheses.</p>
+    <p><strong>Rationale:</strong> The primary working notebook. Updated continuously. Subject to Ouroboros compression when source count approaches ceiling.</p>
+    <p><strong>Update frequency:</strong> High — after every research session.</p>
+  </div>
+
+  <div class="notebook-card literature">
+    <div class="nb-label">📚 Notebook Type 3 — Literature Notebook</div>
+    <p><strong>Contents:</strong> Academic papers, stitched research surveys, external technical documentation, benchmark reports.</p>
+    <p><strong>Rationale:</strong> Separates authoritative external sources from internal logs. Prevents internal working notes from contaminating citation-backed retrieval of external literature.</p>
+    <p><strong>Update frequency:</strong> Medium — as new literature is reviewed.</p>
+  </div>
+
+  <div class="notebook-card handoff">
+    <div class="nb-label">🤝 Notebook Type 4 — Handoff Notebook</div>
+    <p><strong>Contents:</strong> Distilled MVAL summaries, onboarding guides, personnel transition documents, "state of the project" snapshots.</p>
+    <p><strong>Rationale:</strong> Designed for new-reader optimization. Every document in this notebook should be readable by someone who has never seen the project before. This is the institutional memory artifact — the one that survives personnel transitions.</p>
+    <p><strong>Update frequency:</strong> At transition events: role changes, project milestones, semester boundaries, OPT/visa transitions.</p>
+  </div>
+
+  <div class="notebook-card failure">
+    <div class="nb-label">🗃️ Notebook Type 5 — Failure Archive</div>
+    <p><strong>Contents:</strong> Failed experiment logs, abandoned approach documentation, dead-end records, negative results.</p>
+    <p><strong>Rationale:</strong> A searchable record of what did not work, preventing duplicate negative work across the team and across time. A failure archive that has never been queried has already paid for itself — the moment someone asks "has anyone tried X?" before spending two weeks on X.</p>
+    <p><strong>Update frequency:</strong> After every failure event, per the MVAL Failure Artifact Protocol.</p>
+  </div>
+
+  <!-- BENCHMARK -->
+  <h1 class="section-title">Retrieval Quality by Segmentation Strategy</h1>
+
+  <table>
+    <tr><th>Configuration</th><th>Retrieval Quality</th><th>Citation Precision</th><th>Cross-domain noise</th></tr>
+    <tr>
+      <td>Single mixed notebook (all types together)</td>
+      <td><span class="cross">Degraded</span></td>
+      <td><span class="cross">Low</span></td>
+      <td><span class="cross">High</span></td>
+    </tr>
+    <tr>
+      <td>Two notebooks (literature vs. logs)</td>
+      <td><span class="partial">Improved</span></td>
+      <td><span class="partial">Moderate</span></td>
+      <td><span class="partial">Reduced</span></td>
+    </tr>
+    <tr>
+      <td>Five-notebook taxonomy (full segmentation)</td>
+      <td><span class="check">+64% vs. single</span></td>
+      <td><span class="check">High</span></td>
+      <td><span class="check">Minimal</span></td>
+    </tr>
+  </table>
+
+  <div class="alert alert-info">
+    <strong>Naming conventions</strong>
+    A standardized notebook naming taxonomy is in development. See <a href="boyle-roadmap.html">Roadmap AI-006</a> for the planned taxonomy standard. Until then: use consistent prefixes per type (e.g., <code>[PROJECT]-charter</code>, <code>[PROJECT]-research</code>, <code>[PROJECT]-lit</code>, <code>[PROJECT]-handoff</code>, <code>[PROJECT]-failures</code>).
+  </div>
+
+</div>
+
+<div class="doc-footer">
+  <p><strong>Boyle System Documentation Suite</strong> — Document 3 of 6: Corpus Management Guide</p>
+  <p style="margin-top:8px;">Version 1.1 | March 2026 | Medhavy LLC &nbsp;·&nbsp; Bear Brown LLC &nbsp;·&nbsp; Humanitarians AI</p>
+</div>
+
+<footer class="bb-footer">
+  Built with <a href="https://www.bearbrown.co" target="_blank" rel="noopener">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medhavy white label architecture — system reference</title>
+  <meta name="description" content="Technical reference for developers working on the Medhavy adaptive learning platform's white label system. Covers tenant registry schema, theme configuration fields, analytics payload structure, AI pipeline stages, and the technical gap priority matrix. Read this to understand the current system state before implementing or modifying any white label component.">
+  <meta name="keywords" content="Medhavy, white label, multi-tenant, tenant registry, Orama, Next.js, Clerk, Supabase, bandit architecture, pedagogy selector, analytics, edtech, bearbrown, Humanitarians AI, developer reference">
+  <style>
+    :root {
+      --bb-1: #1a0a00;
+      --bb-2: #8B3A0F;
+      --bb-3: #C0392B;
+      --bb-4: #E8A020;
+      --bb-5: #D4500A;
+      --bb-6: #B8860B;
+      --bb-7: #C8A96E;
+      --bb-8: #F0E6D0;
+    }
+
+    @media print {
+      .page-break { page-break-before: always; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: var(--bb-1);
+      background: #fff;
+      font-size: 10pt;
+    }
+
+    .cover {
+      min-height: 40vh;
+      background: linear-gradient(135deg, var(--bb-1) 0%, var(--bb-2) 60%, var(--bb-5) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+      padding: 40px;
+    }
+
+    .cover h1 {
+      font-size: 28pt;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-family: 'Consolas', monospace;
+      letter-spacing: 2px;
+    }
+
+    .cover .subtitle { font-size: 12pt; opacity: 0.85; margin-bottom: 16px; }
+
+    .cover .doc-type-badge {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 9pt;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .version-meta {
+      font-size: 9pt;
+      opacity: 0.7;
+      margin-top: 20px;
+      font-family: 'Consolas', monospace;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 30px 40px; }
+
+    h1.section-title {
+      font-size: 18pt;
+      color: var(--bb-2);
+      border-bottom: 3px solid var(--bb-2);
+      padding-bottom: 8px;
+      margin: 35px 0 20px 0;
+      font-family: 'Consolas', monospace;
+    }
+
+    h2 {
+      font-size: 13pt;
+      color: var(--bb-1);
+      margin: 28px 0 12px 0;
+      border-left: 4px solid var(--bb-2);
+      padding-left: 12px;
+    }
+
+    h3 { font-size: 11pt; color: var(--bb-5); margin: 18px 0 8px 0; }
+
+    p { margin: 10px 0; }
+
+    code {
+      background: var(--bb-8);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 9pt;
+      color: var(--bb-2);
+      border: 1px solid var(--bb-7);
+    }
+
+    pre {
+      background: var(--bb-1);
+      color: var(--bb-8);
+      padding: 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 9pt;
+      margin: 14px 0;
+      font-family: 'Consolas', monospace;
+      line-height: 1.5;
+    }
+
+    pre code { background: none; color: inherit; padding: 0; border: none; }
+
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 9pt; }
+
+    th {
+      background: var(--bb-2);
+      color: white;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    td { padding: 10px 12px; border-bottom: 1px solid var(--bb-7); vertical-align: top; }
+    tr:nth-child(even) { background: var(--bb-8); }
+
+    .alert { padding: 14px 18px; border-radius: 6px; margin: 16px 0; }
+    .alert-info    { background: var(--bb-8); border-left: 4px solid var(--bb-2); color: var(--bb-1); }
+    .alert-warning { background: #fffbeb; border-left: 4px solid var(--bb-4); color: var(--bb-1); }
+    .alert-danger  { background: #fdf2f2; border-left: 4px solid var(--bb-3); color: var(--bb-1); }
+    .alert strong  { display: block; margin-bottom: 5px; }
+
+    .field-table td:first-child {
+      font-family: 'Consolas', monospace;
+      font-size: 9pt;
+      color: var(--bb-2);
+      white-space: nowrap;
+    }
+
+    .field-table td:nth-child(2) {
+      font-size: 8.5pt;
+      color: #555;
+      font-family: 'Consolas', monospace;
+    }
+
+    .required { color: var(--bb-3); font-weight: bold; font-size: 8pt; }
+    .optional { color: var(--bb-6); font-size: 8pt; }
+
+    .priority-critical { color: var(--bb-3); font-weight: bold; }
+    .priority-high     { color: var(--bb-5); font-weight: bold; }
+    .priority-medium   { color: var(--bb-6); }
+    .priority-low      { color: #65a30d; }
+
+    .check   { color: #22c55e; }
+    .cross   { color: var(--bb-3); }
+    .partial { color: var(--bb-4); }
+
+    ul, ol { margin: 10px 0 10px 22px; }
+    li { margin: 5px 0; }
+
+    .section-note {
+      font-size: 9pt;
+      color: var(--bb-6);
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+
+    .gap-id {
+      font-family: 'Consolas', monospace;
+      font-weight: 700;
+      color: var(--bb-2);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 11px;
+      color: #999;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 40px;
+    }
+
+    footer a { color: #999; }
+  </style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="doc-type-badge">📋 Reference</div>
+  <h1>WHITE LABEL ARCHITECTURE</h1>
+  <div class="subtitle">System reference — current state</div>
+  <p style="max-width:600px;opacity:0.8;font-size:10pt;">
+    Medhavy adaptive learning platform · multi-tenant white label system
+  </p>
+  <div class="version-meta">Version 1.0 | March 2026 | Reviewed by Dev the Dev</div>
+</div>
+
+<div class="container">
+
+  <div class="alert alert-info" style="margin-top:28px;">
+    <strong>What this document is</strong>
+    This is a reference document. It describes the Medhavy white label system as it currently exists — stack, configuration schema, analytics payload, pipeline stages, and known gaps. It is not a deployment guide and not a pedagogical explanation. Use it to look things up, not to learn how to deploy or to understand why the architecture is designed as it is. Those are separate documents.
+  </div>
+
+  <!-- SECTION 1: STACK -->
+  <h1 class="section-title">1. Platform stack</h1>
+  <p class="section-note">Current as of March 2026. Live deployments: Science, Physics. White label slots: available.</p>
+
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Notes</th></tr>
+    <tr><td>Frontend framework</td><td>Next.js</td><td>App router. Per-deployment layout via hostname resolution.</td></tr>
+    <tr><td>Authentication</td><td>Clerk (B2B org pattern)</td><td>Each institutional client = one Clerk Organization. Learners scoped to org.</td></tr>
+    <tr><td>Session tokens</td><td>JWT, 24-hour expiry</td><td>Hub verifies on every page load — see gap AI-003.</td></tr>
+    <tr><td>Search / retrieval</td><td>Orama (semantic)</td><td>One isolated index per deployment. No cross-tenant data.</td></tr>
+    <tr><td>AI pipeline</td><td>OpenAI</td><td>Two-stage: analyze-context → chat. See pipeline section.</td></tr>
+    <tr><td>Analytics storage</td><td>Supabase</td><td>Webhook receiver bypasses 16KB Clerk ceiling. See gap TD-008.</td></tr>
+    <tr><td>Hub / registry</td><td>hub.medhavy.com</td><td>Authentication · registry · analytics · access control · dashboard.</td></tr>
+    <tr><td>Content format</td><td>MDX via Fumadocs</td><td>Indexed into Orama at publish time.</td></tr>
+    <tr><td>Styling</td><td>Tailwind + CSS variables</td><td>Theme injected at root layout via next-themes. Per-tenant config object.</td></tr>
+  </table>
+
+  <!-- SECTION 2: SYSTEM ARCHITECTURE -->
+  <h1 class="section-title">2. System architecture</h1>
+
+  <pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│                     MEDHAVI HUB (hub.medhavy.com)                    │
+│  Authentication · Registry · Analytics · Access Control · Dashboard  │
+│  Stack: Next.js · Clerk · JWT (24hr sessions)                        │
+└───────────────────────┬─────────────────────────────────────────────┘
+                        │
+          ┌─────────────┼──────────────┐
+          ▼             ▼              ▼
+   [deployment-A]  [deployment-B]  [deployment-N]
+   (Live: Science)  (Live: Physics)  (White Label Slot)
+          │              │              │
+          └──────────────┼──────────────┘
+                         │
+          ┌──────────────▼──────────────────────────────┐
+          │         AI CHAT PIPELINE (Per Deployment)    │
+          │  Stage 1: /api/analyze-context               │
+          │    → question + page context + history       │
+          │    → keywords + tags + follow-ups + plan     │
+          │    → active pedagogy mode injected here      │
+          │  Stage 2: /api/chat                          │
+          │    → Orama semantic search (isolated index)  │
+          │    → Sources + pedagogy prompt injected      │
+          │    → SSE stream: sources → tokens → done     │
+          │  Rule: Not in textbook → "Not in textbook."  │
+          └──────────────────────────────────────────────┘
+                         │
+          ┌──────────────▼──────────────────────────────┐
+          │    BANDIT LAYER (Pedagogical selection)      │
+          │  Tracks: approach → outcome → update         │
+          │  Selects from: Direct · Socratic · Case ·   │
+          │    Retrieval · Project                       │
+          │  Updates: per learner, per session, per topic│
+          └──────────────────────────────────────────────┘
+                         │
+          ┌──────────────▼──────────────────────────────┐
+          │    PERSONA LAYER (Swappable per client)      │
+          │  Tone · Depth · Examples · Disclaimer        │
+          │  Stored in tenant registry — not in code     │
+          └──────────────────────────────────────────────┘</pre>
+
+  <!-- SECTION 3: TENANT REGISTRY SCHEMA -->
+  <h1 class="section-title">3. Tenant registry schema</h1>
+
+  <div class="alert alert-warning">
+    <strong>⚠ Gap TD-001 — not yet implemented</strong>
+    The tenant registry currently lives in Clerk organization metadata, which has a 16KB ceiling and no structured lookup. The schema below represents the target state. The minimum viable implementation is <code>tenants.json</code> or an Edge Config KV store. See the gap matrix in section 6.
+  </div>
+
+  <p>Each key is the institutional deployment hostname. All fields are required unless marked optional.</p>
+
+  <pre>
+{
+  "[client].medhavy.com": {
+    "orgId":           "org_clienta_2026",      // Clerk organization ID
+    "textbooks":       ["ai-literacy-v1"],       // array of textbook identifiers
+    "oramaIndex":      "[ENV: ORAMA_INDEX_X]",   // env var name — not the key value
+    "oramaKey":        "[ENV: ORAMA_KEY_X]",     // env var name — not the key value
+    "persona":         "corporate-advisor",      // persona identifier — see section 4
+    "pedagogy": {
+      "active":        ["case-based", "project-based"],  // approaches bandit tests
+      "bandwidthTest": false,                            // true = test all five
+      "default":       "direct-instruction"             // fallback if bandit uninit
+    },
+    "badgeIssuer":     "[Institution Name]",     // appears on credential
+    "textbookOnly":    true                      // AI restricted to textbook content
+  }
+}</pre>
+
+  <h3>Field reference</h3>
+  <table class="field-table">
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr>
+      <td>orgId</td>
+      <td>string</td>
+      <td><span class="required">Required</span></td>
+      <td>Clerk organization ID. All API routes filter by this value.</td>
+    </tr>
+    <tr>
+      <td>textbooks</td>
+      <td>string[]</td>
+      <td><span class="required">Required</span></td>
+      <td>Array of textbook identifiers. Must match Orama index content.</td>
+    </tr>
+    <tr>
+      <td>oramaIndex</td>
+      <td>string</td>
+      <td><span class="required">Required</span></td>
+      <td>Name of the environment variable holding the Orama index ID — not the ID itself. See gap TD-003.</td>
+    </tr>
+    <tr>
+      <td>oramaKey</td>
+      <td>string</td>
+      <td><span class="required">Required</span></td>
+      <td>Name of the environment variable holding the Orama API key — not the key itself. See gap TD-003.</td>
+    </tr>
+    <tr>
+      <td>persona</td>
+      <td>string</td>
+      <td><span class="required">Required</span></td>
+      <td>Persona identifier. Must match an entry in the persona config store. See section 4.</td>
+    </tr>
+    <tr>
+      <td>pedagogy.active</td>
+      <td>string[]</td>
+      <td><span class="required">Required</span></td>
+      <td>Valid values: <code>direct-instruction</code> · <code>socratic</code> · <code>case-based</code> · <code>spaced-retrieval</code> · <code>project-based</code></td>
+    </tr>
+    <tr>
+      <td>pedagogy.bandwidthTest</td>
+      <td>boolean</td>
+      <td><span class="optional">Optional</span></td>
+      <td>If true, bandit tests all five approaches regardless of <code>active</code> array. Default: false.</td>
+    </tr>
+    <tr>
+      <td>pedagogy.default</td>
+      <td>string</td>
+      <td><span class="required">Required</span></td>
+      <td>Fallback approach used before the bandit has enough data to select. Must be in <code>active</code> array.</td>
+    </tr>
+    <tr>
+      <td>badgeIssuer</td>
+      <td>string</td>
+      <td><span class="required">Required</span></td>
+      <td>Institution name as it appears on issued credentials.</td>
+    </tr>
+    <tr>
+      <td>textbookOnly</td>
+      <td>boolean</td>
+      <td><span class="required">Required</span></td>
+      <td>If true, AI responds "Not in textbook." to any question outside indexed content. Always true for white label deployments.</td>
+    </tr>
+  </table>
+
+  <!-- SECTION 4: THEME CONFIG -->
+  <h1 class="section-title">4. Theme configuration schema</h1>
+
+  <p>Theme config is injected at root layout via <code>next-themes</code> and Tailwind CSS variables. No code changes required per deployment — all values are data.</p>
+
+  <pre>
+const clientTheme = {
+  institutionName:  "[Institution Full Name]",
+  platformName:     "[Institution] AI Learning Lab",
+  primaryColor:     "[Brand hex — 6-digit]",
+  secondaryColor:   "[Brand hex — 6-digit]",
+  logoUrl:          "/logos/[client]-logo.png",
+  faviconUrl:       "/favicons/[client]-favicon.ico",
+  fontFamily:       "'Inter', sans-serif",
+  domain:           "[client].medhavy.com",
+
+  persona: {
+    name:           "[Institution] AI Advisor",
+    tone:           "authoritative | empathetic | inquisitive | structured",
+    depth:          "decision-support | conceptual | foundational | applied",
+    examples:       "finance | policy | curriculum | clinical | general",
+    disclaimer:     "Responses sourced from [Institution]-verified materials only.",
+    textbookOnly:   true
+  }
+};</pre>
+
+  <h3>Valid persona tone values</h3>
+  <table>
+    <tr><th>Value</th><th>Behavior</th><th>Typical deployment</th></tr>
+    <tr><td><code>authoritative</code></td><td>Direct, concise, decision-oriented. Minimal hedging.</td><td>Executive education, professional associations</td></tr>
+    <tr><td><code>empathetic</code></td><td>Encouraging, patient, checks understanding frequently.</td><td>K-12 networks</td></tr>
+    <tr><td><code>inquisitive</code></td><td>Responds to answers with questions. Resists giving direct answers.</td><td>Think tanks, policy organizations</td></tr>
+    <tr><td><code>structured</code></td><td>Framework-forward. Names the model before applying it.</td><td>Curriculum organizations</td></tr>
+  </table>
+
+  <h3>Valid persona depth values</h3>
+  <table>
+    <tr><th>Value</th><th>Behavior</th></tr>
+    <tr><td><code>decision-support</code></td><td>Orients responses toward actionable decisions. ROI-framing.</td></tr>
+    <tr><td><code>conceptual</code></td><td>Prioritizes understanding over application. Policy and research contexts.</td></tr>
+    <tr><td><code>foundational</code></td><td>Assumes minimal prior knowledge. Defines before using.</td></tr>
+    <tr><td><code>applied</code></td><td>Ties every concept to a concrete task or output.</td></tr>
+  </table>
+
+  <!-- SECTION 5: ANALYTICS PAYLOAD -->
+  <h1 class="section-title">5. Analytics payload schema</h1>
+
+  <div class="alert alert-warning">
+    <strong>⚠ Gap TD-008 — Supabase sync not yet live</strong>
+    The payload below is the target schema for the Supabase webhook receiver at <code>POST /api/analytics/ingest</code>. This endpoint does not yet exist. See gap matrix.
+  </div>
+
+  <pre>
+POST /api/analytics/ingest
+{
+  "orgId":        "org_clienta_2026",          // required — Clerk org
+  "userId":       "[anonymized-hash]",          // required — never raw PII
+  "event":        "ai_interaction",             // event type
+  "pedagogy":     "case-based",                // active approach at time of event
+  "chapter":      "module-3-application",      // textbook chapter identifier
+  "query":        "[learner question text]",   // stored for grounding audit only
+  "response":     "grounded",                  // enum: grounded | not_in_textbook
+  "mouseTrace":   {
+    "path":       [...],                        // coordinate array
+    "dwellMs":    4200                          // milliseconds on section
+  },
+  "bandyUpdate":  {
+    "approach":   "case-based",
+    "outcome":    "positive"                    // enum: positive | neutral | negative
+  },
+  "timestamp":    "2026-04-01T14:23:00Z"
+}</pre>
+
+  <h3>Event type reference</h3>
+  <table>
+    <tr><th>event value</th><th>Description</th><th>Required fields</th></tr>
+    <tr><td><code>ai_interaction</code></td><td>Learner submitted a query to the AI tutor</td><td>all</td></tr>
+    <tr><td><code>chapter_open</code></td><td>Learner opened a textbook chapter</td><td>orgId, userId, chapter, timestamp</td></tr>
+    <tr><td><code>chapter_complete</code></td><td>Learner marked chapter complete or scrolled to end</td><td>orgId, userId, chapter, timestamp</td></tr>
+    <tr><td><code>session_start</code></td><td>New authenticated session began</td><td>orgId, userId, timestamp</td></tr>
+  </table>
+
+  <h3>bandyUpdate.outcome values</h3>
+  <table>
+    <tr><th>Value</th><th>Condition</th></tr>
+    <tr><td><code>positive</code></td><td>Learner continued engagement after response — follow-up question, chapter progression</td></tr>
+    <tr><td><code>neutral</code></td><td>Session ended without clear positive or negative signal</td></tr>
+    <tr><td><code>negative</code></td><td>Learner disengaged, repeated same question, or explicitly indicated confusion</td></tr>
+  </table>
+
+  <!-- SECTION 6: GAP MATRIX -->
+  <h1 class="section-title">6. Technical gap priority matrix</h1>
+  <p class="section-note">CRITICAL and HIGH gaps must be resolved before any external institutional deployment. BACKLOG items are not blockers at pilot scale.</p>
+
+  <table>
+    <tr><th>ID</th><th>Description</th><th>Priority</th><th>Minimum viable fix</th><th>Sprint</th></tr>
+    <tr>
+      <td><span class="gap-id">TD-001</span></td>
+      <td>Tenant registry lives in Clerk org metadata. No structured lookup. Blocks multi-tenant routing.</td>
+      <td><span class="priority-critical">CRITICAL</span></td>
+      <td>Implement <code>tenants.json</code> or Edge Config KV. Map hostname → Orama credentials + persona + pedagogy + content manifest.</td>
+      <td>Sprint 1</td>
+    </tr>
+    <tr>
+      <td><span class="gap-id">TD-003</span></td>
+      <td>Orama credentials hard-coded in source. Security and multi-tenant blocker.</td>
+      <td><span class="priority-critical">CRITICAL</span></td>
+      <td>Migrate all Orama keys to environment variables, one env var pair per tenant. Registry references env var names, not values.</td>
+      <td>Sprint 1</td>
+    </tr>
+    <tr>
+      <td><span class="gap-id">TD-008</span></td>
+      <td>All analytics stored in Clerk org metadata. 16KB ceiling hit at moderate interaction volume.</td>
+      <td><span class="priority-high">HIGH</span></td>
+      <td>Supabase webhook receiver at <code>/api/analytics/ingest</code>. See payload schema in section 5.</td>
+      <td>Sprint 1</td>
+    </tr>
+    <tr>
+      <td><span class="gap-id">Theme config</span></td>
+      <td>Branding changes require code edits. Every new client needs a developer.</td>
+      <td><span class="priority-high">HIGH</span></td>
+      <td>CSS variable injection at root layout from tenant config object. See theme schema in section 4.</td>
+      <td>Sprint 1</td>
+    </tr>
+    <tr>
+      <td><span class="gap-id">Pedagogy selector</span></td>
+      <td>Bandit approach selection not wired to Stage 1 system prompt. Pedagogy config exists in registry but has no effect on AI behavior.</td>
+      <td><span class="priority-high">HIGH</span></td>
+      <td>Inject active pedagogy mode from tenant config into Stage 1 context analysis prompt. Five prompt variants required — one per approach.</td>
+      <td>Sprint 1</td>
+    </tr>
+    <tr>
+      <td><span class="gap-id">TD-005</span></td>
+      <td><code>TEXTBOOK_ONLY</code> not enforced in Science deployment. New deployments should use Template/Physics logic.</td>
+      <td><span class="partial">NOT A BLOCKER</span></td>
+      <td>New white label deployments built on Template/Physics branch. Science deployment isolated from white label rollout.</td>
+      <td>Backlog</td>
+    </tr>
+    <tr>
+      <td><span class="gap-id">AI-003</span></td>
+      <td>Hub verifies JWT on every page load. Performance cost at scale.</td>
+      <td><span class="priority-low">LOW</span></td>
+      <td>Session caching. Defer until after first pilot — not a correctness issue, a performance issue.</td>
+      <td>Sprint 2</td>
+    </tr>
+    <tr>
+      <td><span class="gap-id">TD-009</span></td>
+      <td>User iteration not synced on delete events. Stale data risk.</td>
+      <td><span class="priority-low">LOW</span></td>
+      <td>Defer. Not triggered at pilot scale.</td>
+      <td>Sprint 3</td>
+    </tr>
+  </table>
+
+  <!-- SECTION 7: SUPPORTED INSTITUTION TYPES -->
+  <h1 class="section-title">7. Supported deployment types</h1>
+  <p class="section-note">This table defines expected configuration defaults by institution type. All values are overridable per tenant.</p>
+
+  <table>
+    <tr>
+      <th>Institution type</th>
+      <th>Default pedagogy.active</th>
+      <th>Default persona.tone</th>
+      <th>Default persona.depth</th>
+    </tr>
+    <tr>
+      <td>Business school executive education</td>
+      <td>case-based, project-based</td>
+      <td>authoritative</td>
+      <td>decision-support</td>
+    </tr>
+    <tr>
+      <td>Think tank / policy organization</td>
+      <td>socratic, case-based</td>
+      <td>inquisitive</td>
+      <td>conceptual</td>
+    </tr>
+    <tr>
+      <td>Curriculum organization</td>
+      <td>direct-instruction, project-based</td>
+      <td>structured</td>
+      <td>applied</td>
+    </tr>
+    <tr>
+      <td>Private K-12 network</td>
+      <td>spaced-retrieval, project-based</td>
+      <td>empathetic</td>
+      <td>foundational</td>
+    </tr>
+    <tr>
+      <td>Professional association</td>
+      <td>direct-instruction, spaced-retrieval</td>
+      <td>authoritative</td>
+      <td>foundational</td>
+    </tr>
+  </table>
+
+</div>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co" target="_blank" rel="noopener">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>

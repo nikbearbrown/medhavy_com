@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boyle System adaptive instructional architecture — five learning modes and multi-armed bandit engine</title>
+  <meta name="description" content="Technical explanation for engineers, learning scientists, and program designers implementing the Boyle System's adaptive pedagogy layer. Covers the five evidence-based instructional modes, Thompson Sampling bandit selection, contextual learner feature vectors, GAMBITTS LLM integration, and algorithmic fairness constraints. After reading, you understand how the system selects and adapts instructional strategies in real time and why each design decision was made.">
+  <meta name="keywords" content="multi-armed bandit, adaptive learning, instructional design, Thompson Sampling, GAMBITTS, scaffolding, Socratic questioning, cognitive load theory, Zone of Proximal Development, Boyle System, NotebookLM pedagogy, AI tutoring, CMAB, contextual bandit">
+  <style>
+    :root {
+      --bb-1: #1a0a00;
+      --bb-2: #8B3A0F;
+      --bb-3: #C0392B;
+      --bb-4: #E8A020;
+      --bb-5: #D4500A;
+      --bb-6: #B8860B;
+      --bb-7: #C8A96E;
+      --bb-8: #F0E6D0;
+    }
+
+    @media print {
+      .page-break { page-break-before: always; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .no-print { display: none; }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: var(--bb-1);
+      background: #fff;
+      font-size: 10pt;
+    }
+
+    .doc-nav {
+      background: var(--bb-1);
+      padding: 10px 20px;
+      font-size: 8.5pt;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .doc-nav strong { color: var(--bb-4); margin-right: 6px; }
+    .doc-nav a { color: var(--bb-7); text-decoration: none; opacity: 0.8; }
+    .doc-nav a:hover { color: var(--bb-4); opacity: 1; }
+    .doc-nav a.active { color: var(--bb-4); font-weight: 600; opacity: 1; }
+
+    .cover {
+      min-height: 60vh;
+      background: linear-gradient(135deg, var(--bb-1) 0%, var(--bb-2) 55%, var(--bb-1) 100%);
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; text-align: center; color: white; padding: 40px;
+    }
+    .cover .badge {
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+      padding: 7px 20px; border-radius: 20px; font-size: 9pt; font-weight: 700;
+      margin-bottom: 30px; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .cover .doc-type {
+      background: var(--bb-4); color: var(--bb-1); padding: 4px 14px;
+      border-radius: 12px; font-size: 8.5pt; font-weight: 700; margin-bottom: 16px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .cover h1 { font-size: 26pt; font-weight: 700; margin-bottom: 8px; font-family: 'Consolas', monospace; letter-spacing: 2px; }
+    .cover .subtitle { font-size: 12pt; opacity: 0.85; margin-bottom: 20px; }
+    .cover p.lead { max-width: 600px; opacity: 0.8; font-size: 10.5pt; }
+    .cover-meta { font-size: 9pt; opacity: 0.6; margin-top: 40px; line-height: 1.8; }
+
+    .version-meta {
+      font-size: 9pt; color: var(--bb-6); text-align: center;
+      padding: 8px 16px; background: var(--bb-8); border-radius: 4px;
+      margin: 24px 0; font-family: 'Consolas', monospace; border-left: 3px solid var(--bb-6);
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 30px 40px; }
+
+    h1.section-title {
+      font-size: 17pt; color: var(--bb-1); border-bottom: 3px solid var(--bb-2);
+      padding-bottom: 8px; margin: 35px 0 20px 0; font-family: 'Consolas', monospace;
+    }
+    h2 { font-size: 13pt; color: var(--bb-2); margin: 28px 0 12px 0; border-left: 4px solid var(--bb-2); padding-left: 12px; }
+    h3 { font-size: 11pt; color: var(--bb-2); margin: 20px 0 10px 0; }
+    h4 { font-size: 10pt; color: var(--bb-6); margin: 14px 0 8px 0; font-weight: 600; }
+    p { margin: 10px 0; }
+
+    code {
+      background: var(--bb-8); padding: 2px 6px; border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace; font-size: 9pt; color: var(--bb-2);
+    }
+
+    pre {
+      background: var(--bb-1); color: var(--bb-7); padding: 15px;
+      border-radius: 6px; overflow-x: auto; font-size: 9pt;
+      margin: 12px 0; font-family: 'Consolas', monospace;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 9pt; }
+    th { background: var(--bb-1); color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--bb-7); vertical-align: top; }
+    tr:nth-child(even) { background: var(--bb-8); }
+
+    .alert { padding: 15px 18px; border-radius: 6px; margin: 15px 0; }
+    .alert-info    { background: var(--bb-8); border-left: 4px solid var(--bb-2); color: var(--bb-2); }
+    .alert-warning { background: #fffbeb; border-left: 4px solid var(--bb-4); color: var(--bb-5); }
+    .alert-danger  { background: #fdf2f2; border-left: 4px solid var(--bb-3); color: var(--bb-3); }
+    .alert strong  { display: block; margin-bottom: 5px; }
+
+    .card {
+      border: 1px solid var(--bb-7); border-radius: 8px;
+      padding: 18px; margin: 15px 0; background: var(--bb-8);
+    }
+    .card-header { font-weight: 600; color: var(--bb-1); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--bb-7); }
+
+    .mode-card {
+      border: 1px solid var(--bb-7); border-radius: 8px;
+      padding: 16px 20px; margin: 12px 0; background: var(--bb-8);
+      border-left: 5px solid var(--bb-2);
+    }
+    .mode-card.socratic   { border-left-color: var(--bb-6); }
+    .mode-card.scaffold   { border-left-color: var(--bb-4); }
+    .mode-card.direct     { border-left-color: var(--bb-5); }
+    .mode-card.apprentice { border-left-color: var(--bb-2); }
+    .mode-card.metacog    { border-left-color: var(--bb-3); }
+
+    .mode-label { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .mode-card.socratic   .mode-label { color: var(--bb-6); }
+    .mode-card.scaffold   .mode-label { color: var(--bb-4); }
+    .mode-card.direct     .mode-label { color: var(--bb-5); }
+    .mode-card.apprentice .mode-label { color: var(--bb-2); }
+    .mode-card.metacog    .mode-label { color: var(--bb-3); }
+
+    ul, ol { margin: 10px 0 10px 20px; }
+    li { margin: 5px 0; }
+
+    .bb-footer {
+      text-align: center; padding: 20px; font-size: 11px;
+      color: #999; border-top: 1px solid var(--bb-7); margin-top: 40px;
+    }
+    .bb-footer a { color: #999; }
+
+    .doc-footer {
+      background: var(--bb-1); color: var(--bb-7); text-align: center;
+      padding: 28px; margin-top: 0; font-size: 9pt;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="doc-nav no-print">
+  <strong>Boyle System Docs:</strong>
+  <a href="boyle-system-overview.html">Overview</a>
+  <a href="boyle-mval-reference.html">MVAL Reference</a>
+  <a href="boyle-corpus-management.html">Corpus Management</a>
+  <a href="boyle-adaptive-architecture.html" class="active">Adaptive Architecture</a>
+  <a href="boyle-deployment-guide.html">Deployment Guide</a>
+  <a href="boyle-roadmap.html">Roadmap</a>
+</nav>
+
+<div class="cover">
+  <div class="badge">📄 Explanation — Boyle System Suite · Document 4 of 6</div>
+  <div class="doc-type">Explanation</div>
+  <h1>ADAPTIVE INSTRUCTIONAL ARCHITECTURE</h1>
+  <div class="subtitle">Five Learning Modes and the Multi-Armed Bandit Engine</div>
+  <p class="lead">
+    How the Boyle System selects, applies, and adapts instructional strategies in real time —
+    and why each design decision was made. For engineers, learning scientists, and program designers.
+  </p>
+  <div class="cover-meta">
+    <p>Version 1.1 | March 2026</p>
+    <p>Medhavy LLC &nbsp;|&nbsp; Bear Brown LLC &nbsp;|&nbsp; Humanitarians AI (501(c)(3))</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="version-meta">Version 1.1 | March 2026 | Reviewed by Dev the Dev</div>
+
+  <div class="alert alert-info">
+    <strong>What this document explains</strong>
+    The theoretical and architectural reasoning behind the Boyle System's adaptive pedagogy layer — the five instructional modes, the bandit selection engine, learner context vectors, GAMBITTS integration, and fairness constraints. This is not an implementation guide. If you need to configure a deployment, see the <a href="boyle-deployment-guide.html">Deployment Guide</a>. If you need to track implementation status, see the <a href="boyle-roadmap.html">Roadmap</a>.
+  </div>
+
+  <!-- THE CENTRAL PROBLEM -->
+  <h1 class="section-title">The Central Problem: The Assistance Dilemma</h1>
+
+  <p>Every instructional system faces the same fundamental tension. Too much assistance produces high immediate success rates but shallow cognitive structures — learners who can perform with help but cannot transfer without it. Too little assistance forces impasse-driven learning, which works only when the learner has sufficient self-regulation and prior knowledge to bridge the gap. When those conditions aren't met, the result is disengagement.</p>
+
+  <div class="alert alert-info">
+    <strong>The Assistance Dilemma</strong>
+    Too much assistance → high immediate success but shallow cognitive structures. Too little assistance → impasse-driven learning only if the learner has sufficient self-regulation; otherwise, disengagement. The five-mode system navigates this dynamically, adapting to the learner's state rather than assuming a fixed optimal level.
+  </div>
+
+  <p>Static instructional systems solve this by picking a single mode and applying it uniformly — a course that is always Socratic, a platform that always provides direct instruction. The Boyle System's answer is a multi-armed bandit that treats each instructional mode as a discrete arm and learns, in real time, which arm is most effective for each learner at each moment.</p>
+
+  <!-- THE FIVE MODES -->
+  <h1 class="section-title">The Five Learning Modes</h1>
+
+  <p>Each mode is calibrated to a specific learner state, cognitive load condition, and desired learning outcome. Each has a theoretical basis from the learning sciences. None of them is universally optimal — that is the point.</p>
+
+  <div class="mode-card socratic">
+    <div class="mode-label">💬 Mode 1 — Socratic Questioning</div>
+    <p><strong>Operational definition:</strong> Iterative probing using leading questions and progressive hints that elicit latent knowledge from the learner rather than delivering information directly.</p>
+    <p style="margin-top:8px;"><strong>Theoretical basis:</strong> Active retrieval and schema refinement. Knowledge elicited through productive struggle is retained significantly longer than knowledge delivered passively.</p>
+    <p style="margin-top:8px;"><strong>Optimal state:</strong> Learners with adequate foundational schemas; integrative or synthesis tasks; executive education case discussions.</p>
+    <p style="margin-top:8px;"><strong>Risk:</strong> Can induce frustration and cognitive overload when foundational schemas are absent. The bandit detects this via rising response latency without accuracy gains — a high-fidelity signal that Socratic mode has exceeded the learner's current capability.</p>
+  </div>
+
+  <div class="mode-card scaffold">
+    <div class="mode-label">🏗️ Mode 2 — Scaffolding</div>
+    <p><strong>Operational definition:</strong> Reducing degrees of freedom by removing distractors, pre-filling procedural steps, or providing structured templates that allow the learner to focus on the core knowledge component.</p>
+    <p style="margin-top:8px;"><strong>Theoretical basis:</strong> Vygotsky's Zone of Proximal Development (ZPD) — the system maintains the learner at the edge of their capability without exceeding it. Scaffolding provides the temporary structure that allows the learner to perform above their current independent capability.</p>
+    <p style="margin-top:8px;"><strong>Optimal state:</strong> High cognitive load conditions; new procedural skills; onboarding scenarios in executive education.</p>
+    <p style="margin-top:8px;"><strong>Risk:</strong> The Expertise Reversal Effect — once mastery is achieved, continued scaffolding actively impedes fluency by adding unnecessary cognitive load. The bandit detects this transition via knowledge tracing and reduces scaffold weight accordingly.</p>
+  </div>
+
+  <div class="mode-card direct">
+    <div class="mode-label">📋 Mode 3 — Direct Instruction</div>
+    <p><strong>Operational definition:</strong> Explicit delivery of facts, definitions, or procedural rules. No elicitation; information is provided directly and efficiently.</p>
+    <p style="margin-top:8px;"><strong>Theoretical basis:</strong> Cognitive Load Theory — minimizes extraneous cognitive load when the learner lacks prerequisite schemas, enabling rapid acquisition of new Knowledge Components (KCs).</p>
+    <p style="margin-top:8px;"><strong>Optimal state:</strong> Prerequisite concept introduction; low-energy or high-stress learner states; situations where exploratory modes would cause disengagement before any learning occurs.</p>
+    <p style="margin-top:8px;"><strong>Risk:</strong> Passive dependency if used exclusively. The system enforces a minimum exploration rate across all other modes — every learner is regularly given the opportunity to engage with more demanding modes.</p>
+  </div>
+
+  <div class="mode-card apprentice">
+    <div class="mode-label">🔬 Mode 4 — Cognitive Apprenticeship</div>
+    <p><strong>Operational definition:</strong> Modeling expert processes via worked examples, "think-aloud" demonstrations, or "first letter" hints that reveal the structure of expert reasoning without completing the task for the learner.</p>
+    <p style="margin-top:8px;"><strong>Theoretical basis:</strong> Observational learning and expert visualization. Learners acquire procedural fluency and strategy adoption by watching expert processes made visible — by seeing not just what the expert does, but how they think about it.</p>
+    <p style="margin-top:8px;"><strong>Optimal state:</strong> Complex multi-step procedures; professional practice domains (consulting, research methodology, case analysis); think tank workflows.</p>
+    <p style="margin-top:8px;"><strong>Risk:</strong> High LLM generation cost. The IC-Cache optimization routes Cognitive Apprenticeship requests to cached high-quality examples where possible, reducing cost without degrading quality.</p>
+  </div>
+
+  <div class="mode-card metacog">
+    <div class="mode-label">🧠 Mode 5 — Meta-cognitive Feedback</div>
+    <p><strong>Operational definition:</strong> Prompts for reflection, strategy evaluation, and self-monitoring. Rather than providing content, the system asks the learner to evaluate their own approach, predict their performance, or identify their gaps.</p>
+    <p style="margin-top:8px;"><strong>Theoretical basis:</strong> Self-Regulated Learning (SRL) theory. Learners who can monitor and regulate their own cognition perform significantly better on transfer tasks — they learn how to learn, not just what to learn.</p>
+    <p style="margin-top:8px;"><strong>Optimal state:</strong> Advanced learners approaching mastery; post-task review; program-level reflection in executive education; doctoral and research training contexts.</p>
+    <p style="margin-top:8px;"><strong>Risk:</strong> Entirely ineffective for novices who lack the foundational knowledge to evaluate their own performance accurately. Applied too early, it produces confusion rather than reflection.</p>
+  </div>
+
+  <h2>Mode Selection Summary</h2>
+
+  <table>
+    <tr>
+      <th>Mode</th>
+      <th>Theoretical Basis</th>
+      <th>Optimal Learner State</th>
+      <th>Primary Risk</th>
+    </tr>
+    <tr>
+      <td>Socratic Questioning</td>
+      <td>Active retrieval, schema refinement</td>
+      <td>Moderate–high prior knowledge</td>
+      <td>Frustration if schemas absent</td>
+    </tr>
+    <tr>
+      <td>Scaffolding</td>
+      <td>Zone of Proximal Development</td>
+      <td>Low–moderate; high cognitive load</td>
+      <td>Expertise Reversal Effect</td>
+    </tr>
+    <tr>
+      <td>Direct Instruction</td>
+      <td>Cognitive Load Theory</td>
+      <td>Novice; low energy; high stress</td>
+      <td>Passive dependency</td>
+    </tr>
+    <tr>
+      <td>Cognitive Apprenticeship</td>
+      <td>Observational learning</td>
+      <td>Intermediate; procedural tasks</td>
+      <td>High LLM generation cost</td>
+    </tr>
+    <tr>
+      <td>Meta-cognitive Feedback</td>
+      <td>Self-Regulated Learning</td>
+      <td>Advanced; near or post-mastery</td>
+      <td>Ineffective for novices</td>
+    </tr>
+  </table>
+
+  <!-- MULTI-ARMED BANDIT -->
+  <h1 class="section-title">The Multi-Armed Bandit Architecture</h1>
+
+  <p>Each of the five instructional modes is treated as a discrete "arm" of a Multi-Armed Bandit (MAB). The bandit engine selects which mode to apply at each instructional moment, balancing exploration (trying modes with uncertain effectiveness for this learner) against exploitation (using the mode currently estimated to be most effective).</p>
+
+  <h2>Thompson Sampling — Bayesian Mode Selection</h2>
+
+  <div class="card">
+    <div class="card-header">How Thompson Sampling works in the Boyle System</div>
+    <p>For each instructional mode <code>a ∈ {1,...,5}</code>, the system maintains a belief state modeled as a Beta distribution <code>Beta(αₐ, βₐ)</code> for binary rewards, or a Gaussian distribution <code>N(μₐ, σₐ²)</code> for continuous learning progress metrics.</p>
+    <p style="margin-top:10px;">Thompson Sampling draws a sample from each mode's posterior and selects the mode with the highest sample. This naturally produces high exploration early in a session — when uncertainty about the learner's response to each mode is high — and converges on the most effective personalized strategy as evidence accumulates.</p>
+    <p style="margin-top:10px;"><strong>Why not UCB or epsilon-greedy?</strong> Thompson Sampling handles non-stationarity more gracefully than UCB and produces more natural exploration-exploitation balance than epsilon-greedy. For non-stationary learning trajectories — which all real learners produce — the Bayesian approach is more appropriate.</p>
+  </div>
+
+  <h2>The Contextual Bandit — Learner State Vectors</h2>
+
+  <p>A context-free bandit cannot achieve true personalization — it treats all learners identically and learns only from aggregated signal. The Contextual MAB (CMAB) incorporates a feature vector <code>xₜ</code> representing the learner's current state:</p>
+
+  <pre>
+E[rₜ | xₜ, a] = xₜᵀ θₐ
+
+Where:
+  xₜ  = learner context vector at time t
+  θₐ  = learned weight vector for instructional mode a
+  rₜ  = expected reward (learning progress)</pre>
+
+  <table>
+    <tr>
+      <th>Feature Category</th>
+      <th>Features Included</th>
+      <th>Role in Bandit</th>
+    </tr>
+    <tr>
+      <td>Surface-Level (Stable)</td>
+      <td>Baseline education level, prior academic performance, domain background</td>
+      <td>Sets initial priors; "warm start" for new learners before interaction data accumulates</td>
+    </tr>
+    <tr>
+      <td>Deep-Level (Dynamic)</td>
+      <td>Current Knowledge Component mastery, error distributions, response latency</td>
+      <td>Primary signal for real-time mode switching; updated after every interaction</td>
+    </tr>
+    <tr>
+      <td>Affective State</td>
+      <td>Estimated mood, energy level, stress indicators</td>
+      <td>Temporarily biases toward lower-load modes (Direct, Scaffolding) when stress indicators are high</td>
+    </tr>
+    <tr>
+      <td>Knowledge Tracing (DKT/BKT)</td>
+      <td>Mastery probability per skill from sequence of prior responses</td>
+      <td>Detects Expertise Reversal; triggers mode drift away from scaffolding toward exploration</td>
+    </tr>
+  </table>
+
+  <div class="alert alert-info">
+    <strong>Response Latency as Cognitive Load Proxy</strong>
+    An increase in response latency without a corresponding increase in accuracy is a high-fidelity signal that the current instructional mode is exceeding the learner's current capability. The bandit treats this pattern as a negative reward signal and shifts toward more structured modes. This proxy requires no self-report — it is observable without the learner knowing they are being measured.
+  </div>
+
+  <h2>Three Implementation Phases</h2>
+
+  <div class="card">
+    <div class="card-header">Phase 1 — Expert-Guided Initialization (Cold Start)</div>
+    <p>Before the system has enough data to personalize, it uses expert knowledge to seed the bandit's priors. Direct Instruction is the default mode for prerequisite concepts; Socratic Questioning is prioritized for integrative tasks. This warm-start mechanism prevents detrimental random exploration in early sessions — a new learner should not be subjected to a Socratic interrogation on their first day.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Phase 2 — Online Adaptation and Clustering</div>
+    <p>As learners interact with the system, the bandit refines its models. Local Clustering in Bandits (LOCB) groups learners by preference parameters <code>θₐ</code>. New learners whose initial behavior matches an existing cluster inherit that cluster's learned policy — dramatically accelerating personalization without requiring extended individual observation.</p>
+    <p style="margin-top:8px;">This collaborative filtering approach scales intelligence across entire cohorts. A think tank that has deployed the system across three cohorts has accumulated learner cluster data that benefits the fourth cohort from day one.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Phase 3 — Non-Stationary Drift (Expertise Reversal Management)</div>
+    <p>Learning is non-stationary — a learner's optimal mode changes as they develop. Sliding Window UCB or Discounted Thompson Sampling gives more weight to recent observations. As deep-level features indicate higher competence, rewards for Direct Instruction and heavy Scaffolding naturally decline, while rewards for Socratic Questioning and Meta-cognitive Feedback increase.</p>
+    <p style="margin-top:8px;">The bandit policy drifts with the learner — a seamless transition from guided structure to open-ended exploration, without requiring any explicit configuration change.</p>
+  </div>
+
+  <!-- REWARD MODELING -->
+  <h1 class="section-title">Reward Modeling</h1>
+
+  <h2>Learning Progress as Reward Signal</h2>
+
+  <p>Simple correctness rewards create a perverse incentive: the bandit maximizes assistance to guarantee "success," producing over-assistance — helping learners get correct answers without learning anything. The Boyle System uses <strong>Learning Progress (LP)</strong> as its primary reward signal:</p>
+
+  <pre>
+r = cᵢ(t) - cᵢ(t-1)
+
+Where cᵢ(t) = probability of mastery for Knowledge Component i at time t
+
+If a learner already knows a concept: cᵢ(t) - cᵢ(t-1) ≈ 0
+→ Bandit shifts to more challenging content or Meta-cognitive mode
+
+If progress is rapid: reward is high
+→ Bandit reinforces the current instructional mode</pre>
+
+  <h2>Composite Reward Function</h2>
+
+  <table>
+    <tr><th>Reward Component</th><th>Metric</th><th>Purpose</th></tr>
+    <tr><td>Immediate Success</td><td>P(Correct | Mode)</td><td>Maintains learner motivation and "flow" state</td></tr>
+    <tr><td>Knowledge Gain</td><td>ΔMastery</td><td>Ensures the mode is actually teaching, not just enabling correct answers</td></tr>
+    <tr><td>Efficiency</td><td>1 / Time-on-Task</td><td>Penalizes unnecessarily verbose or slow modes</td></tr>
+    <tr><td>Persistence</td><td>Session completion rate</td><td>Encourages modes that sustain long-term engagement</td></tr>
+  </table>
+
+  <!-- GAMBITTS -->
+  <h1 class="section-title">GAMBITTS — LLM Integration</h1>
+
+  <p>When instructional content is generated by LLMs in real time, a standard bandit faces a fundamental problem: it selects an <em>action</em> (e.g., "provide a Socratic hint") but the <em>treatment</em> delivered to the learner is the stochastic output of the LLM — variable, unpredictable, and not fully controlled by the action choice. GAMBITTS (Generator-Mediated Bandit-Thompson Sampling) explicitly models this action-treatment split.</p>
+
+  <pre>
+GAMBITTS PIPELINE
+
+Bandit Agent
+  └─ Selects: Instructional mode A + prompt template P
+              (e.g., "Use Socratic questioning to explain concept X")
+                          │
+                          ▼
+              LLM Generator (stochastic)
+  └─ Produces: Specific text string Gₜ
+                          │
+                          ▼
+              Embedding Projection
+  └─ Projects: High-dim text Gₜ → Low-dim embedding Zₜ
+              (Detects when different outputs deliver the same pedagogy)
+                          │
+                          ▼
+              Reward Signal
+  └─ Learner response → LP reward → Update θₐ posterior</pre>
+
+  <h2>IC-Cache — Architectural Optimization</h2>
+
+  <table>
+    <tr><th>System Component</th><th>Optimization Strategy</th><th>Pedagogical Impact</th></tr>
+    <tr>
+      <td>Example Selector</td>
+      <td>Caches high-utility request-response pairs from larger models</td>
+      <td>Enables smaller, faster models to emulate Cognitive Apprenticeship quality</td>
+    </tr>
+    <tr>
+      <td>Request Router</td>
+      <td>Routes simple queries to small models, complex ones (Socratic) to large models</td>
+      <td>Maintains low latency during critical "flow" states when response speed matters</td>
+    </tr>
+    <tr>
+      <td>Example Manager</td>
+      <td>Continuously refines cached examples based on learner rewards</td>
+      <td>Ensures scaffolding examples remain aligned with actual learner outcomes</td>
+    </tr>
+  </table>
+
+  <!-- FAIRNESS -->
+  <h1 class="section-title">Algorithmic Fairness Constraints</h1>
+
+  <p>Without fairness constraints, a bandit that learns from historical data can permanently route certain learners into a narrow set of modes — reflecting prior educational disadvantage rather than actual learning potential.</p>
+
+  <div class="card">
+    <div class="card-header">The Pigeonholing Problem</div>
+    <p>If a bandit observes that a demographic subgroup has historically responded well to Direct Instruction — potentially because prior educational experiences have conditioned them to passive reception — it may permanently route those learners into a Direct Instruction loop. This denies them access to higher-order modes like Socratic Questioning or Meta-cognitive Feedback. The system's decisions would then mirror and amplify the educational disadvantage it was meant to overcome.</p>
+  </div>
+
+  <div class="alert alert-warning">
+    <strong>Fairness constraint: minimum exploration rate across all five modes</strong>
+    The Boyle System enforces a minimum exploration rate across all five instructional modes for all learner demographics. Every learner is regularly given the opportunity to succeed with more challenging, exploratory modes, regardless of initial cluster assignment or historical response patterns. A fairness audit protocol to monitor this constraint is on the roadmap — see <a href="boyle-roadmap.html">Roadmap AI-008</a>.
+  </div>
+
+  <!-- IMPLEMENTATION STATUS -->
+  <h1 class="section-title">Implementation Status</h1>
+
+  <p>The adaptive architecture described in this document represents the full design specification. Current deployment status:</p>
+
+  <table>
+    <tr><th>Component</th><th>Status</th><th>Notes</th></tr>
+    <tr><td>Five instructional modes (conceptual)</td><td>Defined</td><td>Deployed as manual selection in current pilot</td></tr>
+    <tr><td>Thompson Sampling MAB engine</td><td>Planned</td><td>See Roadmap — full MAB Engine</td></tr>
+    <tr><td>Contextual learner vectors (CMAB)</td><td>Planned</td><td>Requires DKT/BKT integration</td></tr>
+    <tr><td>GAMBITTS LLM integration</td><td>Planned</td><td>Dependent on MAB engine deployment</td></tr>
+    <tr><td>IC-Cache optimization</td><td>Planned</td><td>Post-GAMBITTS</td></tr>
+    <tr><td>Fairness audit protocol</td><td>Planned</td><td>See Roadmap AI-008</td></tr>
+    <tr><td>Phase 1 expert priors for exec education</td><td>In development</td><td>See Roadmap AI-004</td></tr>
+  </table>
+
+  <p>For full roadmap with effort estimates and priorities, see the <a href="boyle-roadmap.html">Roadmap document</a>.</p>
+
+</div>
+
+<div class="doc-footer">
+  <p><strong>Boyle System Documentation Suite</strong> — Document 4 of 6: Adaptive Instructional Architecture</p>
+  <p style="margin-top:8px;">Version 1.1 | March 2026 | Medhavy LLC &nbsp;·&nbsp; Bear Brown LLC &nbsp;·&nbsp; Humanitarians AI</p>
+</div>
+
+<footer class="bb-footer">
+  Built with <a href="https://www.bearbrown.co" target="_blank" rel="noopener">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>
