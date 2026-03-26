@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 ]
 
 const SOCIAL_LINKS = [
-  { name: 'GitHub', href: 'https://github.com/nikbearbrown' },
+  { name: 'GitHub', href: 'https://github.com/Medhavy' },
   { name: 'YouTube', href: 'https://www.youtube.com/@NikBearBrown' },
   { name: 'Substack', href: 'https://medhavy.substack.com/' },
 ]

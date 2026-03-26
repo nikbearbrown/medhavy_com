@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 const SOCIAL_LINKS = [
-  { name: 'GitHub', href: 'https://github.com/nikbearbrown' },
+  { name: 'GitHub', href: 'https://github.com/Medhavy' },
   { name: 'YouTube', href: 'https://www.youtube.com/@NikBearBrown' },
 ]
 
