@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { name: 'Blog', href: '/blog' },
   { name: 'Books', href: '/books' },
   { name: 'Dev', href: '/dev' },
+  { name: 'Hub', href: 'https://hub.medhavy.com/' },
   { name: 'Notes', href: '/notes' },
   { name: 'Tools', href: '/tools' },
 ]
@@ -48,18 +49,34 @@ export default function Header() {
             <span className="text-lg font-bold tracking-tighter">Medhavy</span>
           </Link>
           <nav className="hidden lg:flex gap-6">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  'text-sm font-medium transition-colors hover:text-foreground/80',
-                  pathname === item.href ? 'text-foreground' : 'text-foreground/60',
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const isExternal = item.href.startsWith('http')
+              if (isExternal) {
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
+                  >
+                    {item.name}
+                  </a>
+                )
+              }
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    'text-sm font-medium transition-colors hover:text-foreground/80',
+                    pathname === item.href ? 'text-foreground' : 'text-foreground/60',
+                  )}
+                >
+                  {item.name}
+                </Link>
+              )
+            })}
           </nav>
         </div>
 
@@ -96,19 +113,36 @@ export default function Header() {
           />
           <div ref={menuRef} className="fixed inset-x-0 top-16 z-50 mt-px bg-background border-b p-6 shadow-lg">
             <nav className="flex flex-col space-y-4">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    'text-base font-medium transition-colors hover:text-foreground/80',
-                    pathname === item.href ? 'text-foreground' : 'text-foreground/60',
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {NAV_ITEMS.map((item) => {
+                const isExternal = item.href.startsWith('http')
+                if (isExternal) {
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-base font-medium transition-colors hover:text-foreground/80 text-foreground/60"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </a>
+                  )
+                }
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      'text-base font-medium transition-colors hover:text-foreground/80',
+                      pathname === item.href ? 'text-foreground' : 'text-foreground/60',
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              })}
               <div className="flex flex-col gap-4 mt-4">
                 {SOCIAL_LINKS.map((link) => (
                   <a
