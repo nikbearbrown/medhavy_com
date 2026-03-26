@@ -16,7 +16,7 @@ export default function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Company Info */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Medhavy LLC</h3>
+            <h3 className="text-sm font-semibold">Medhavy AI, LLC</h3>
             <div className="text-sm text-muted-foreground space-y-1">
               <p>30 N Gould St Ste N</p>
               <p>Sheridan, WY 82801</p>
@@ -82,7 +82,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-8 pt-6 border-t text-center text-sm text-muted-foreground">
-          &copy; {currentYear} Medhavy LLC. All rights reserved.
+          &copy; {currentYear} Medhavy AI, LLC. All rights reserved.
         </div>
       </div>
     </footer>

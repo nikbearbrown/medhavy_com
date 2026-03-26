@@ -1,7 +1,7 @@
 # CLAUDE.md — medhavy.com
 
 ## Who this site is for
-Medhavy — adaptive learning platform, white-label, institution-deployable AI education infrastructure. Operated by Medhavy LLC.
+Medhavy — adaptive learning platform, white-label, institution-deployable AI education infrastructure. Operated by Medhavy AI, LLC.
 
 Primary audiences:
 - Educators and instructional leaders looking for AI-powered learning tools
@@ -22,7 +22,7 @@ Primary audiences:
 - adm-zip (server-side Substack ZIP parsing)
 
 ## Founders
-Medhavy LLC was founded by **Nik Bear Brown** and **Srinivas Sridhar**.
+Medhavy AI, LLC was founded by **Nik Bear Brown** and **Srinivas Sridhar**.
 
 ## Site structure
 1. `/` — Home (platform intro + services + connect)
@@ -38,9 +38,9 @@ Medhavy LLC was founded by **Nik Bear Brown** and **Srinivas Sridhar**.
 11. `/tools` — Tools directory (hybrid: filesystem artifacts + Neon DB link tools)
 12. `/tools/[slug]` — Artifact tool embed page (full-viewport iframe)
 13. `/about` — CV / bio page (prose format, founders info)
-14. `/privacy` — Privacy Policy for Medhavy LLC
-15. `/privacy/cookies` — Cookie Policy for Medhavy LLC (dedicated page)
-16. `/terms-of-service` — Terms of Service for Medhavy LLC
+14. `/privacy` — Privacy Policy for Medhavy AI, LLC
+15. `/privacy/cookies` — Cookie Policy for Medhavy AI, LLC (dedicated page)
+16. `/terms-of-service` — Terms of Service for Medhavy AI, LLC
 17. `/substack` — Newsletter hub: card grid of all Substack sections
 18. `/substack/[section]` — Section page: description, "Follow on Substack" CTA, chronological article list
 19. `/substack/[section]/[slug]` — Full article: attribution banner, prose content, "Subscribe on Substack" footer CTA
@@ -72,7 +72,7 @@ Medhavy LLC was founded by **Nik Bear Brown** and **Srinivas Sridhar**.
 
 ### Footer (`/components/Footer/Footer.tsx`) — DONE
 Four-column grid layout:
-- **Company Info:** Medhavy LLC, 30 N Gould St Ste N, Sheridan WY 82801, medhavy@humanitarians.ai- **Platform:** Links to Tools, Blog, About
+- **Company Info:** Medhavy AI, LLC, 30 N Gould St Ste N, Sheridan WY 82801, medhavy@humanitarians.ai- **Platform:** Links to Tools, Blog, About
 - **Connect:** GitHub, YouTube, Substack (text links)
 - **Legal:** Privacy Policy, Cookie Policy, Terms of Service
 - Bottom bar: copyright
@@ -282,7 +282,7 @@ Prose-forward format with sections:
 Content describes founders, Medhavy platform mission, what we build, Humanitarians AI connection, and contact info.
 
 ## Legal Pages — DONE
-All three pages follow the Humanitarians AI structural template, rewritten for Medhavy LLC. Founded by Nik Bear Brown and Srinivas Sridhar. Each references: Medhavy LLC, 30 N Gould St Ste N, Sheridan WY 82801, medhavy@humanitarians.ai, AI consulting services.
+All three pages follow the Humanitarians AI structural template, rewritten for Medhavy AI, LLC. Founded by Nik Bear Brown and Srinivas Sridhar. Each references: Medhavy AI, LLC, 30 N Gould St Ste N, Sheridan WY 82801, medhavy@humanitarians.ai, AI consulting services.
 
 ### Privacy Policy (`/app/privacy/page.tsx`)
 Sections: introduction, information we collect (contact data, inquiry content, consulting engagement data, analytics), how we use info, sharing (consent, legitimate interests, contract, legal, vital interests), third-party services (Vercel, Neon, Substack, Anthropic, GitHub, YouTube), cookies reference (links to Cookie Policy page), data security, data retention, your privacy rights, children's privacy, changes, contact. Nav: Terms of Service ← → Cookie Policy.

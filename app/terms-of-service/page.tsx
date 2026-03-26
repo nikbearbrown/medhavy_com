@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service - Medhavy LLC',
-  description: 'Terms of Service for Medhavy LLC, AI consulting services, and medhavy.com',
+  title: 'Terms of Service - Medhavy AI, LLC',
+  description: 'Terms of Service for Medhavy AI, LLC, AI consulting services, and medhavy.com',
 }
 
 export default function TermsOfServicePage() {
@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
               our website.
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
-              <li><strong>Company:</strong> Medhavy LLC (Nik Brown, Sole Member)</li>
+              <li><strong>Company:</strong> Medhavy AI, LLC (Nik Brown, Sole Member)</li>
               <li><strong>Address:</strong> 30 N Gould St Ste N, Sheridan, WY 82801</li>
               <li><strong>Email:</strong>{' '}
                 <a href="mailto:medhavy@humanitarians.ai" className="text-primary hover:underline">medhavy@humanitarians.ai</a>
@@ -35,7 +35,7 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">2. Website Purpose</h2>
             <p>
-              Medhavy LLC provides AI consulting services, educational content, newsletter publications, and related
+              Medhavy AI, LLC provides AI consulting services, educational content, newsletter publications, and related
               resources. The medhavy.com website serves as an informational resource, newsletter archive, tool directory,
               and professional contact point. Content on this website is intended to provide general information about our
               organization, services, and activities, and does not constitute professional advice.
@@ -45,9 +45,9 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">3. AI Consulting Services</h2>
             <p>
-              Medhavy LLC offers AI consulting services to organizations, including strategy, implementation, and
+              Medhavy AI, LLC offers AI consulting services to organizations, including strategy, implementation, and
               connecting organizations with recent engineering graduates. All consulting engagements are governed by
-              separate written agreements between Medhavy LLC and the client. These Terms apply to use of this
+              separate written agreements between Medhavy AI, LLC and the client. These Terms apply to use of this
               website only and do not supersede any consulting engagement agreement.
             </p>
           </section>
@@ -56,9 +56,9 @@ export default function TermsOfServicePage() {
             <h2 className="text-2xl font-semibold mb-4">4. Intellectual Property</h2>
             <p>
               All content on this website, including text, graphics, logos, images, audio, newsletter articles, AI tools,
-              and software, is the property of Medhavy LLC or its content suppliers and is protected by United States
+              and software, is the property of Medhavy AI, LLC or its content suppliers and is protected by United States
               and international copyright laws. The compilation of all content on this website is the exclusive property
-              of Medhavy LLC.
+              of Medhavy AI, LLC.
             </p>
             <p className="mt-4">
               Newsletter content originally published on Substack is displayed with attribution to its original source.
@@ -82,7 +82,7 @@ export default function TermsOfServicePage() {
             </ul>
             <p className="mt-4">
               This license shall automatically terminate if you violate any of these restrictions and may be terminated
-              by Medhavy LLC at any time.
+              by Medhavy AI, LLC at any time.
             </p>
           </section>
 
@@ -116,9 +116,9 @@ export default function TermsOfServicePage() {
             <h2 className="text-2xl font-semibold mb-4">8. Third-Party Services and Links</h2>
             <p>
               This website integrates with and contains links to third-party services including Substack,
-              GitHub, YouTube, Vercel, Neon, and Anthropic. Medhavy LLC does not guarantee the accuracy,
+              GitHub, YouTube, Vercel, Neon, and Anthropic. Medhavy AI, LLC does not guarantee the accuracy,
               relevance, timeliness, or completeness of any information on these external services. Please note that
-              Medhavy LLC is not responsible for the content, privacy practices, or availability of these external
+              Medhavy AI, LLC is not responsible for the content, privacy practices, or availability of these external
               services. Your use of third-party services is governed by their respective terms.
             </p>
           </section>
@@ -126,15 +126,15 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">9. Disclaimer</h2>
             <p>
-              The materials on Medhavy LLC&apos;s website are provided &ldquo;as is&rdquo; and &ldquo;as available.&rdquo;
-              Medhavy LLC makes no warranties, expressed or implied, and hereby disclaims and negates all other
+              The materials on Medhavy AI, LLC&apos;s website are provided &ldquo;as is&rdquo; and &ldquo;as available.&rdquo;
+              Medhavy AI, LLC makes no warranties, expressed or implied, and hereby disclaims and negates all other
               warranties, including without limitation, implied warranties or conditions of merchantability, fitness for
               a particular purpose, or non-infringement of intellectual property or other violation of rights.
             </p>
             <p className="mt-4">
               AI-related content, tools, and recommendations are provided for informational and educational purposes
               only. They should not be relied upon as the sole basis for business, technical, or professional decisions.
-              Medhavy LLC does not warrant that the website will be uninterrupted, error-free, or free of harmful
+              Medhavy AI, LLC does not warrant that the website will be uninterrupted, error-free, or free of harmful
               components.
             </p>
           </section>
@@ -142,9 +142,9 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">10. Limitations</h2>
             <p>
-              In no event shall Medhavy LLC or its sole member be liable for any damages (including, without
+              In no event shall Medhavy AI, LLC or its sole member be liable for any damages (including, without
               limitation, damages for loss of data or profit, or due to business interruption) arising out of the use
-              or inability to use the materials on this website, even if Medhavy LLC or an authorized representative
+              or inability to use the materials on this website, even if Medhavy AI, LLC or an authorized representative
               has been notified orally or in writing of the possibility of such damage.
             </p>
           </section>
@@ -152,7 +152,7 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">11. Indemnification</h2>
             <p>
-              You agree to indemnify and hold harmless Medhavy LLC, its sole member, and its affiliates from any
+              You agree to indemnify and hold harmless Medhavy AI, LLC, its sole member, and its affiliates from any
               claims, damages, losses, or expenses (including reasonable attorneys&apos; fees) arising from your use
               of the website or violation of these Terms.
             </p>
@@ -161,9 +161,9 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">12. Revisions and Errata</h2>
             <p>
-              The materials appearing on Medhavy LLC&apos;s website could include technical, typographical, or
-              photographic errors. Medhavy LLC does not warrant that any of the materials on its website are accurate,
-              complete, or current. Medhavy LLC may make changes to the materials contained on its website at any time
+              The materials appearing on Medhavy AI, LLC&apos;s website could include technical, typographical, or
+              photographic errors. Medhavy AI, LLC does not warrant that any of the materials on its website are accurate,
+              complete, or current. Medhavy AI, LLC may make changes to the materials contained on its website at any time
               without notice.
             </p>
           </section>
@@ -180,7 +180,7 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">14. Modifications to Terms of Service</h2>
             <p>
-              Medhavy LLC may revise these Terms of Service at any time without notice. By using this website, you
+              Medhavy AI, LLC may revise these Terms of Service at any time without notice. By using this website, you
               are agreeing to be bound by the then-current version of these Terms. Changes take effect immediately upon
               posting. We encourage you to review this page periodically.
             </p>
@@ -189,7 +189,7 @@ export default function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">15. Contact</h2>
             <p>
-              If you have any questions about these Terms, please contact Medhavy LLC:
+              If you have any questions about these Terms, please contact Medhavy AI, LLC:
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
               <li><strong>Email:</strong>{' '}

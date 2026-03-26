@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - Medhavy LLC',
-  description: 'Privacy policy for Medhavy LLC, AI consulting services, and medhavy.com',
+  title: 'Privacy Policy - Medhavy AI, LLC',
+  description: 'Privacy policy for Medhavy AI, LLC, AI consulting services, and medhavy.com',
 }
 
 export default function PrivacyPolicyPage() {
@@ -19,14 +19,14 @@ export default function PrivacyPolicyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Introduction</h2>
             <p>
-              Welcome to <strong>medhavy.com</strong>, operated by <strong>Medhavy LLC</strong> (Nik Brown, Sole Member),
+              Welcome to <strong>medhavy.com</strong>, operated by <strong>Medhavy AI, LLC</strong> (Nik Brown, Sole Member),
               a Wyoming limited liability company providing AI consulting services. We are committed to protecting your
               personal information and your right to privacy. If you have any questions or concerns about this privacy
               policy or our practices with regard to your personal information, please contact us at{' '}
               <a href="mailto:medhavy@humanitarians.ai" className="text-primary hover:underline">medhavy@humanitarians.ai</a>.
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
-              <li><strong>Company:</strong> Medhavy LLC (Nik Brown, Sole Member)</li>
+              <li><strong>Company:</strong> Medhavy AI, LLC (Nik Brown, Sole Member)</li>
               <li><strong>Address:</strong> 30 N Gould St Ste N, Sheridan, WY 82801</li>
               <li><strong>Email:</strong>{' '}
                 <a href="mailto:medhavy@humanitarians.ai" className="text-primary hover:underline">medhavy@humanitarians.ai</a>
@@ -103,7 +103,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>YouTube:</strong> Video content hosting</li>
             </ul>
             <p className="mt-4">
-              We encourage you to review the privacy policies of these third-party services. Medhavy LLC is not
+              We encourage you to review the privacy policies of these third-party services. Medhavy AI, LLC is not
               responsible for the privacy practices of external services.
             </p>
           </section>
@@ -196,7 +196,7 @@ export default function PrivacyPolicyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
             <p>
-              If you have questions or comments about this privacy policy, please contact Medhavy LLC:
+              If you have questions or comments about this privacy policy, please contact Medhavy AI, LLC:
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
               <li><strong>Email:</strong>{' '}

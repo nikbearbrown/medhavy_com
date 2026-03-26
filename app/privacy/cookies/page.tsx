@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy - Medhavy LLC',
-  description: 'Cookie policy for Medhavy LLC and medhavy.com',
+  title: 'Cookie Policy - Medhavy AI, LLC',
+  description: 'Cookie policy for Medhavy AI, LLC and medhavy.com',
 }
 
 export default function CookiePolicyPage() {
@@ -21,11 +21,11 @@ export default function CookiePolicyPage() {
             <p>
               Cookies are small text files that are placed on your computer or mobile device when you visit a website.
               They are widely used to make websites work more efficiently and to provide information to website owners.
-              This Cookie Policy explains how <strong>Medhavy LLC</strong> uses cookies and similar technologies on{' '}
+              This Cookie Policy explains how <strong>Medhavy AI, LLC</strong> uses cookies and similar technologies on{' '}
               <strong>medhavy.com</strong>.
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
-              <li><strong>Company:</strong> Medhavy LLC (Nik Brown, Sole Member)</li>
+              <li><strong>Company:</strong> Medhavy AI, LLC (Nik Brown, Sole Member)</li>
               <li><strong>Address:</strong> 30 N Gould St Ste N, Sheridan, WY 82801</li>
               <li><strong>Email:</strong>{' '}
                 <a href="mailto:medhavy@humanitarians.ai" className="text-primary hover:underline">medhavy@humanitarians.ai</a>
@@ -85,7 +85,7 @@ export default function CookiePolicyPage() {
             <p>
               Our website includes embedded content from third-party services. When these embeds load, the
               third-party provider may set their own cookies in your browser. These cookies are not controlled
-              by Medhavy LLC.
+              by Medhavy AI, LLC.
             </p>
             <ul className="list-disc pl-6 mt-4 space-y-2">
               <li>
@@ -147,7 +147,7 @@ export default function CookiePolicyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
             <p>
-              If you have questions about our use of cookies, please contact Medhavy LLC:
+              If you have questions about our use of cookies, please contact Medhavy AI, LLC:
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
               <li><strong>Email:</strong>{' '}
