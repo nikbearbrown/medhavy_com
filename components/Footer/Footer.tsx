@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 const SOCIAL_LINKS = [
   { name: 'GitHub', href: 'https://github.com/Medhavy' },
+  { name: 'Substack', href: 'https://medhavy.substack.com/' },
   { name: 'YouTube', href: 'https://www.youtube.com/@NikBearBrown' },
 ]
 
@@ -33,14 +34,23 @@ export default function Footer() {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">Platform</h3>
             <div className="flex flex-col gap-2">
-              <Link href="/tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Tools
-              </Link>
               <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Blog
               </Link>
-              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                About
+              <Link href="/books" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Books
+              </Link>
+              <Link href="/dev" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Dev
+              </Link>
+              <a href="https://hub.medhavy.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Hub
+              </a>
+              <Link href="/notes" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Notes
+              </Link>
+              <Link href="/tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Tools
               </Link>
             </div>
           </div>
