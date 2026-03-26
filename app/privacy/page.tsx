@@ -19,14 +19,14 @@ export default function PrivacyPolicyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Introduction</h2>
             <p>
-              Welcome to <strong>medhavy.com</strong>, operated by <strong>Medhavy AI, LLC</strong> (Nik Brown, Sole Member),
+              Welcome to <strong>medhavy.com</strong>, operated by <strong>Medhavy AI, LLC</strong> (Nik Bear Brown &amp; Srinivas Sridhar),
               a Wyoming limited liability company providing AI consulting services. We are committed to protecting your
               personal information and your right to privacy. If you have any questions or concerns about this privacy
               policy or our practices with regard to your personal information, please contact us at{' '}
               <a href="mailto:medhavy@humanitarians.ai" className="text-primary hover:underline">medhavy@humanitarians.ai</a>.
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
-              <li><strong>Company:</strong> Medhavy AI, LLC (Nik Brown, Sole Member)</li>
+              <li><strong>Company:</strong> Medhavy AI, LLC (Nik Bear Brown &amp; Srinivas Sridhar)</li>
               <li><strong>Address:</strong> 30 N Gould St Ste N, Sheridan, WY 82801</li>
               <li><strong>Email:</strong>{' '}
                 <a href="mailto:medhavy@humanitarians.ai" className="text-primary hover:underline">medhavy@humanitarians.ai</a>

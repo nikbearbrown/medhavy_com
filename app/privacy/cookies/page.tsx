@@ -25,7 +25,7 @@ export default function CookiePolicyPage() {
               <strong>medhavy.com</strong>.
             </p>
             <ul className="list-none pl-0 mt-4 space-y-1 text-base">
-              <li><strong>Company:</strong> Medhavy AI, LLC (Nik Brown, Sole Member)</li>
+              <li><strong>Company:</strong> Medhavy AI, LLC (Nik Bear Brown &amp; Srinivas Sridhar)</li>
               <li><strong>Address:</strong> 30 N Gould St Ste N, Sheridan, WY 82801</li>
               <li><strong>Email:</strong>{' '}
                 <a href="mailto:medhavy@humanitarians.ai" className="text-primary hover:underline">medhavy@humanitarians.ai</a>
