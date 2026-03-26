@@ -20,7 +20,7 @@ interface Group {
   docs: Doc[]
 }
 
-export default function DevBrowser({ groups }: { groups: Group[] }) {
+export default function NotesBrowser({ groups }: { groups: Group[] }) {
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState<string | null>(null)
 
@@ -62,7 +62,7 @@ export default function DevBrowser({ groups }: { groups: Group[] }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search dev docs..."
+          placeholder="Search notes..."
           className="w-full pl-10 pr-10 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
         />
         {query && (
@@ -103,7 +103,7 @@ export default function DevBrowser({ groups }: { groups: Group[] }) {
       {/* Grouped cards */}
       {totalDocs === 0 ? (
         <p className="text-muted-foreground">
-          {query || activeTag ? 'No dev docs match your search.' : 'No dev docs yet.'}
+          {query || activeTag ? 'No notes match your search.' : 'No notes yet.'}
         </p>
       ) : (
         <div className="space-y-10">
@@ -114,7 +114,7 @@ export default function DevBrowser({ groups }: { groups: Group[] }) {
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {g.docs.map(doc => (
-                  <Link key={doc.slug} href={`/dev/${doc.slug}`}>
+                  <Link key={doc.slug} href={`/notes/${doc.slug}`}>
                     <Card className="h-full hover:border-foreground/20 transition-colors cursor-pointer">
                       <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">

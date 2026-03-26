@@ -26,27 +26,32 @@ Medhavy LLC was founded by **Nik Bear Brown** and **Srinivas Sridhar**.
 
 ## Site structure
 1. `/` — Home (platform intro + services + connect)
-2. `/tools` — Tools directory (card grid, Neon-driven)
-3. `/tools/[slug]` — Artifact tool embed page (full-viewport iframe)
-4. `/dev` — Dev docs browser (searchable card grid, filesystem-driven)
-5. `/dev/[slug]` — Full-viewport iframe of a dev doc HTML file
-6. `/blog` — Blog feed: published posts newest first, clean card list
-7. `/blog/[slug]` — Individual blog post with prose content
-8. `/about` — CV / bio page (prose format, founders info)
-9. `/privacy` — Privacy Policy for Medhavy LLC
-10. `/privacy/cookies` — Cookie Policy for Medhavy LLC (dedicated page)
-11. `/terms-of-service` — Terms of Service for Medhavy LLC
-12. `/substack` — Newsletter hub: card grid of all Substack sections
-13. `/substack/[section]` — Section page: description, "Follow on Substack" CTA, chronological article list
-14. `/substack/[section]/[slug]` — Full article: attribution banner, prose content, "Subscribe on Substack" footer CTA
-15. `/admin/login` — Admin login page (password form)
-16. `/admin/dashboard` — Admin dashboard (protected via middleware + `admin_session` cookie)
-17. `/admin/dashboard/blog` — Manage blog posts (list, create, edit, delete)
-18. `/admin/dashboard/blog/new` — New post editor
-19. `/admin/dashboard/blog/[id]/edit` — Edit existing post
-20. `/admin/dashboard/blog/import` — Import posts (Substack ZIP or blog export ZIP)
-21. `/admin/dashboard/tools` — Manage tools (link and artifact types)
-22. `/admin/dashboard/substack` — Manage Substack sections & import ZIP archives
+2. `/blog` — Blog feed: published posts newest first, clean card list
+3. `/blog/[slug]` — Individual blog post with prose content
+4. `/books` — Books browser (searchable card grid, filesystem-driven from `public/books/`)
+5. `/books/[slug]` — Book detail page with metadata, TOC, chapter links
+6. `/books/[slug]/[...chapter]` — Chapter viewer (full-viewport iframe)
+7. `/dev` — Dev docs browser (searchable, grouped by subdirectory, filesystem-driven from `public/dev/`)
+8. `/dev/[...slug]` — Full-viewport iframe of a dev doc HTML file (e.g. `/dev/Medhavy/doc-name`)
+9. `/notes` — Notes browser (searchable, grouped by subdirectory, filesystem-driven from `public/notes/`)
+10. `/notes/[...slug]` — Full-viewport iframe of a note HTML file (e.g. `/notes/AI-Sherpa/note-name`)
+11. `/tools` — Tools directory (hybrid: filesystem artifacts + Neon DB link tools)
+12. `/tools/[slug]` — Artifact tool embed page (full-viewport iframe)
+13. `/about` — CV / bio page (prose format, founders info)
+14. `/privacy` — Privacy Policy for Medhavy LLC
+15. `/privacy/cookies` — Cookie Policy for Medhavy LLC (dedicated page)
+16. `/terms-of-service` — Terms of Service for Medhavy LLC
+17. `/substack` — Newsletter hub: card grid of all Substack sections
+18. `/substack/[section]` — Section page: description, "Follow on Substack" CTA, chronological article list
+19. `/substack/[section]/[slug]` — Full article: attribution banner, prose content, "Subscribe on Substack" footer CTA
+20. `/admin/login` — Admin login page (password form)
+21. `/admin/dashboard` — Admin dashboard (protected via middleware + `admin_session` cookie)
+22. `/admin/dashboard/blog` — Manage blog posts (list, create, edit, delete)
+23. `/admin/dashboard/blog/new` — New post editor
+24. `/admin/dashboard/blog/[id]/edit` — Edit existing post
+25. `/admin/dashboard/blog/import` — Import posts (Substack ZIP or blog export ZIP)
+26. `/admin/dashboard/tools` — Manage tools (link and artifact types)
+27. `/admin/dashboard/substack` — Manage Substack sections & import ZIP archives
 
 ### Placeholder pages (noindex, inherited from previous project)
 - `/classes` — Coming Soon placeholder
@@ -58,8 +63,8 @@ Medhavy LLC was founded by **Nik Bear Brown** and **Srinivas Sridhar**.
 ## Persistent layout (every page)
 
 ### Header (`/components/Header/Header.tsx`) — DONE
-- Logo: theme-aware SVG (white for dark, black for light)
-- Nav: Home (`/`) | Tools (`/tools`) | Dev (`/dev`) | About (`/about`) | Blog (`/blog`)
+- Logo: text link "Medhavy" linking to `/`
+- Nav (alphabetical): Blog (`/blog`) | Books (`/books`) | Dev (`/dev`) | Notes (`/notes`) | Tools (`/tools`)
 - Social buttons (top right): GitHub, YouTube, Substack — black button style
 - Dark/light mode toggle (ThemeToggle component)
 - Mobile hamburger menu with backdrop (lg breakpoint)
@@ -145,25 +150,53 @@ CREATE POLICY "service_role_tools" ON tools FOR ALL USING (true) WITH CHECK (tru
 1. **Subby** — Substack writing assistant (artifact_id: `6dc0c6cf-32e0-4f53-94b9-f6d01cc4df9c`)
 2. **CRITIQ** — Peer review & paper development protocol (artifact_id: `a53d969f-5aaf-45f6-9992-2c6a00a4122f`)
 
-## Dev Docs system
+## Notes system — DONE
 
-### Adding new dev docs
-1. Build the HTML doc (use Claude Project with the dev docs prompt)
-2. Drop into `public/dev/`
-3. Ensure the HTML has `<title>`, `<meta name="description">`, and `<meta name="keywords">` tags
-4. It appears automatically on `/dev` — no database, no sync needed
+### Adding new notes
+1. Create a subdirectory in `public/notes/` (e.g. `public/notes/AI-Sherpa/`)
+2. Drop HTML files into the subdirectory with `<title>`, `<meta name="description">`, `<meta name="keywords">` tags
+3. Push to main — they appear on `/notes` automatically, grouped by folder
+4. Filesystem is the source of truth
+
+### Public pages
+- `/notes` — searchable card browser grouped by subdirectory, with tag filtering
+- `/notes/[...slug]` — full-viewport iframe of the note (e.g. `/notes/AI-Sherpa/note-name`)
+
+## Books system — DONE
+
+### Adding new books
+1. Create a directory in `public/books/` (e.g. `public/books/Botspeak/`)
+2. Add a `book.json` with metadata (title, subtitle, authors, status, series, description, keywords, parts, etc.)
+3. Add HTML chapter files to the same directory
+4. Push to main — the book appears on `/books` automatically
 5. Filesystem is the source of truth
 
 ### Public pages
-- `/dev` — searchable card browser of all docs in `public/dev/` with tag filtering
-- `/dev/[slug]` — full-viewport iframe of the doc
+- `/books` — searchable card browser with tag filtering, shows title, subtitle, authors, status, series position
+- `/books/[slug]` — book detail page with metadata, cover image, TOC (from parts or flat chapter list)
+- `/books/[slug]/[...chapter]` — chapter viewer (full-viewport iframe)
+
+### Shared utility
+- `lib/book-meta.ts` — `scanBooks(dir)` reads all subdirectories with `book.json`, extracts metadata and chapter files. Returns `BookMeta[]`.
+
+## Dev Docs system — DONE
+
+### Adding new dev docs
+1. Create a subdirectory in `public/dev/` (e.g. `public/dev/Medhavy/`)
+2. Drop HTML files into the subdirectory with `<title>`, `<meta name="description">`, and `<meta name="keywords">` tags
+3. Push to main — they appear on `/dev` automatically, grouped by folder
+4. Filesystem is the source of truth
+
+### Public pages
+- `/dev` — searchable card browser grouped by subdirectory, with tag filtering
+- `/dev/[...slug]` — full-viewport iframe of the doc (e.g. `/dev/Medhavy/doc-name`)
 
 ### Admin
 - `/admin/dashboard` → Dev tab — lists all files with title, filename, tags, description, open/delete buttons
 - "Sync Dev Docs" button refreshes the list from the filesystem
 
 ### Shared utility
-- `lib/html-meta.ts` — `scanHtmlDir(dir)` reads all `.html` files from a directory and extracts `<title>`, `<meta name="description">`, `<meta name="keywords">` tags. Returns `HtmlDocMeta[]`. Used by both `/dev` pages and admin.
+- `lib/html-meta.ts` — `scanHtmlDir(dir)` reads all `.html` files from a directory and extracts `<title>`, `<meta name="description">`, `<meta name="keywords">` tags. Returns `HtmlDocMeta[]`. `scanHtmlSubdirs(dir)` scans subdirectories and returns `GroupedHtmlDocs[]` (used by Notes and Dev). Used by `/notes`, `/dev` pages and admin.
 
 ## Blog system — DONE
 
@@ -379,7 +412,7 @@ NEXT_PUBLIC_ANTHROPIC_API_KEY=   # only if embedding AI assistant directly
 ## What NOT to do
 - Do not use localStorage — use React state or sessionStorage
 - Do not add analytics or tracking beyond what's already present
-- Keep public nav to five items: Home, Tools, Dev, About, Blog
+- Keep public nav to five items (alphabetical): Blog, Books, Dev, Notes, Tools
 - Do not commit .env.local or credentials to git
 
 ## User Guide
@@ -527,10 +560,19 @@ app/
   tools/page.tsx                    # Tools directory (merges filesystem artifacts + DB link tools)
   tools/ToolsBrowser.tsx            # Client component: search + tag filter + card grid
   tools/[slug]/page.tsx             # Tool page (filesystem first, DB fallback)
+  books/
+    page.tsx                        # Books browser (server component, reads filesystem)
+    BooksBrowser.tsx                # Client component: search + tag filter + card grid
+    [slug]/page.tsx                 # Book detail page with metadata + TOC
+    [slug]/[...chapter]/page.tsx    # Chapter viewer (full-viewport iframe)
   dev/
-    page.tsx                        # Dev docs browser (server component, reads filesystem)
-    DevBrowser.tsx                  # Client component: search + tag filter + card grid
-    [slug]/page.tsx                 # Full-viewport iframe for a dev doc
+    page.tsx                        # Dev docs browser (server component, reads filesystem subdirs)
+    DevBrowser.tsx                  # Client component: search + tag filter + grouped card grid
+    [...slug]/page.tsx              # Full-viewport iframe for a dev doc
+  notes/
+    page.tsx                        # Notes browser (server component, reads filesystem subdirs)
+    NotesBrowser.tsx                # Client component: search + tag filter + grouped card grid
+    [...slug]/page.tsx              # Full-viewport iframe for a note
   privacy/page.tsx                  # Privacy Policy
   privacy/cookies/page.tsx          # Cookie Policy (dedicated page)
   terms-of-service/page.tsx         # Terms of Service
@@ -582,8 +624,9 @@ components/
   ui/                               # 60+ shadcn/ui components
 lib/
   utils.ts                          # cn() helper + getReadingTime()
-  html-meta.ts                      # scanHtmlDir() — extract title/desc/keywords from HTML files
-  admin-auth.ts                     # admin_session cookie check
+  html-meta.ts                      # scanHtmlDir() + scanHtmlSubdirs() — extract metadata from HTML files
+  book-meta.ts                      # scanBooks() — read book.json + chapter files from public/books/
+  admin-auth.ts                     # admin_session cookie check (HMAC-SHA256)
   substack-parser.ts                # Substack ZIP parser (adm-zip)
   db.ts                             # Neon PostgreSQL client (sql tagged template)
   viz/
