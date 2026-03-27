@@ -37,21 +37,9 @@ export default function Footer() {
               <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Blog
               </Link>
-              <Link href="/books" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Books
-              </Link>
-              <Link href="/dev" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Dev
-              </Link>
               <a href="https://hub.medhavy.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Hub
               </a>
-              <Link href="/notes" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Notes
-              </Link>
-              <Link href="/tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Tools
-              </Link>
             </div>
           </div>
 

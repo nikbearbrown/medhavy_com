@@ -9,17 +9,11 @@ import ThemeToggle from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { name: 'Blog', href: '/blog' },
-  { name: 'Books', href: '/books' },
-  { name: 'Dev', href: '/dev' },
   { name: 'Hub', href: 'https://hub.medhavy.com/' },
-  { name: 'Notes', href: '/notes' },
-  { name: 'Tools', href: '/tools' },
 ]
 
 const SOCIAL_LINKS = [
   { name: 'GitHub', href: 'https://github.com/Medhavy' },
-  { name: 'YouTube', href: 'https://www.youtube.com/@NikBearBrown' },
-  { name: 'Substack', href: 'https://medhavy.substack.com/' },
 ]
 
 const buttonStyles =
