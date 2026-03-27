@@ -38,7 +38,7 @@ export default function Footer() {
                 Blog
               </Link>
               <a href="https://hub.medhavy.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Hub
+                Medhavy Learning Hub
               </a>
             </div>
           </div>

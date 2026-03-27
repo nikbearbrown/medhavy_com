@@ -70,7 +70,7 @@ export default function Home() {
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 items-center">
             <div className="flex flex-col justify-center space-y-6">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                Medhavy
+                Medhavy AI
               </h1>
               <p className="text-lg text-muted-foreground">
                 Also known as Medhavi
@@ -81,6 +81,9 @@ export default function Home() {
                   &ldquo;intellectually brilliant&rdquo;
                 </strong>
                 {' — the perfect name for our AI-powered intelligent textbook system.'}
+              </p>
+              <p className="max-w-[540px] text-lg italic text-muted-foreground">
+                Come learn something
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <a href="mailto:medhavy@humanitarians.ai" className={buttonStyles}>

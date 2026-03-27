@@ -9,7 +9,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { name: 'Blog', href: '/blog' },
-  { name: 'Hub', href: 'https://hub.medhavy.com/' },
+  { name: 'Medhavy Learning Hub', href: 'https://hub.medhavy.com/' },
 ]
 
 const SOCIAL_LINKS = [
@@ -40,7 +40,7 @@ export default function Header() {
       <div className="container px-4 md:px-6 mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-lg font-bold tracking-tighter">Medhavy</span>
+            <span className="text-lg font-bold tracking-tighter">Medhavy AI</span>
           </Link>
           <nav className="hidden lg:flex gap-6">
             {NAV_ITEMS.map((item) => {
