@@ -64,7 +64,7 @@ export default function BlogFeed({ posts }: { posts: Post[] }) {
       {/* YouTube embed */}
       <div className="aspect-video rounded-lg overflow-hidden shadow-lg mb-8">
         <iframe
-          src="https://www.youtube.com/embed/xAc-1GDRKK8?si=T2oocw7v3lzR5pJm"
+          src="https://www.youtube.com/embed/hWgWmLWivpo?si=27NRLuDdSXp_UnpU"
           title="YouTube video player"
           width="100%"
           height="100%"
