@@ -61,6 +61,21 @@ export default function BlogFeed({ posts }: { posts: Post[] }) {
         )}
       </div>
 
+      {/* YouTube embed */}
+      <div className="aspect-video rounded-lg overflow-hidden shadow-lg mb-8">
+        <iframe
+          src="https://www.youtube.com/embed/xAc-1GDRKK8?si=T2oocw7v3lzR5pJm"
+          title="YouTube video player"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+          className="w-full h-full"
+        />
+      </div>
+
       {filtered.length === 0 ? (
         <p className="text-muted-foreground">
           {query ? `No posts matching "${query}".` : 'No posts yet. Check back soon.'}
