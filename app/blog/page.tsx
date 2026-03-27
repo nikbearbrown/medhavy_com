@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Blog - Medhavy',
-  description: 'Writing on AI, startups, education, and technology by Medhavy.',
+  description: 'Writing on the intersection of AI, humans, education, and technology by Medhavy.',
 }
 
 export default async function BlogPage() {
@@ -34,9 +34,9 @@ export default async function BlogPage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold tracking-tighter mb-4">Blog</h1>
+        <h1 className="text-4xl font-bold tracking-tighter mb-4">Medhavy Blog</h1>
         <p className="text-muted-foreground mb-10">
-          Writing on AI, startups, education, and technology.
+          Writing on the intersection of AI, humans, education, and technology.
         </p>
         <BlogFeed posts={posts} />
       </div>
