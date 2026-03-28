@@ -10,6 +10,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 const NAV_ITEMS = [
   { name: 'Blog', href: '/blog' },
   { name: 'Medhavy Learning Hub', href: 'https://hub.medhavy.com/' },
+  { name: 'Videos', href: '/videos' },
 ]
 
 const SOCIAL_LINKS = [
