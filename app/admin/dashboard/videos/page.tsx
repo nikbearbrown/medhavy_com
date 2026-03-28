@@ -35,7 +35,7 @@ interface Video {
   created_at: string
 }
 
-const SPECIAL_TAGS = ['engineering', 'theory', 'features', 'coming soon']
+const SPECIAL_TAGS = ['engineering', 'theory', 'features', 'how to', 'coming soon']
 
 const EMPTY_FORM = {
   title: '',

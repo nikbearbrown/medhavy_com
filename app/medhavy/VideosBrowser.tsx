@@ -13,7 +13,7 @@ interface Video {
   published_at: string | null
 }
 
-const SPECIAL_TAGS = ['engineering', 'theory', 'features', 'coming soon']
+const SPECIAL_TAGS = ['engineering', 'theory', 'features', 'how to', 'coming soon']
 const PAGE_SIZE = 5
 
 function formatDate(dateStr: string | null): string {
