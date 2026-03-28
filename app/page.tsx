@@ -96,7 +96,7 @@ export default function Home() {
             </div>
             <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
               <iframe
-                src="https://www.youtube.com/embed/xAc-1GDRKK8?si=T2oocw7v3lzR5pJm"
+                src="https://www.youtube.com/embed/29ZfLtleEYo?si=vSzjWyYGAYICIUG9"
                 title="YouTube video player"
                 width="100%"
                 height="100%"
