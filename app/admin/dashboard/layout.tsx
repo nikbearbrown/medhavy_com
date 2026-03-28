@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { name: 'Tools', href: '/admin/dashboard/tools' },
   { name: 'Dev', href: '/admin/dashboard/dev' },
   { name: 'Substack', href: '/admin/dashboard/substack' },
-  { name: 'Videos', href: '/admin/dashboard/videos' },
+  { name: 'What is Medhavy?', href: '/admin/dashboard/videos' },
 ]
 
 export default function AdminDashboardLayout({

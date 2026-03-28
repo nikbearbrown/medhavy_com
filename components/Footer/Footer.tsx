@@ -40,6 +40,9 @@ export default function Footer() {
               <a href="https://hub.medhavy.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Medhavy Learning Hub
               </a>
+              <Link href="/medhavy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                What is Medhavy?
+              </Link>
             </div>
           </div>
 
