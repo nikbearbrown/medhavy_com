@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medhavi 1.5 — Spec Notes</title>
+  <meta name="description" content="Full specification for the Medhavi 1.0 → 1.5 upgrade: what exists, what is being built, and why. Covers four AI modes, context awareness, signal collection, the Glimmer assignment, and build responsibilities.">
+  <meta name="keywords" content="Medhavi, adaptive learning, edtech, Glimmer, FSRS, case study, quiz me, AI tutoring, concept node, spaced retrieval">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bb-1: #1a0a00;
+      --bb-2: #8B3A0F;
+      --bb-3: #C0392B;
+      --bb-4: #E8A020;
+      --bb-5: #D4500A;
+      --bb-6: #B8860B;
+      --bb-7: #C8A96E;
+      --bb-8: #F0E6D0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    header {
+      border-bottom: 2px solid var(--bb-2);
+      padding: 56px 0 40px 0;
+    }
+
+    .header-inner {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    .doc-label {
+      font-family: 'Source Serif 4', serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--bb-5);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--bb-1);
+      line-height: 1.15;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .h1-sub {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--bb-2);
+    }
+
+    main {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 32px 80px 32px;
+    }
+
+    .lead {
+      margin: 48px 0 56px 0;
+      padding: 24px 28px;
+      border-left: 4px solid var(--bb-4);
+      background: rgba(232,160,32,0.07);
+      border-radius: 0 4px 4px 0;
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.55rem;
+      font-weight: 600;
+      color: var(--bb-2);
+      margin: 64px 0 6px 0;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--bb-7);
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--bb-1);
+      margin: 36px 0 10px 0;
+      line-height: 1.3;
+    }
+
+    h4 {
+      font-family: 'Source Serif 4', serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--bb-5);
+      margin: 24px 0 8px 0;
+    }
+
+    p { margin-bottom: 16px; }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--bb-2); font-weight: 600; }
+
+    .mode-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0 24px 0;
+    }
+
+    .mode-btn {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 18px;
+      border: 2px solid var(--bb-2);
+      border-radius: 3px;
+      color: var(--bb-2);
+      background: transparent;
+      letter-spacing: 0.03em;
+    }
+
+    ul, ol { padding-left: 1.5em; margin-bottom: 16px; }
+    li { margin-bottom: 6px; line-height: 1.7; }
+
+    .callout {
+      margin: 24px 0;
+      padding: 18px 24px;
+      border-left: 3px solid var(--bb-5);
+      background: rgba(212,80,10,0.05);
+      border-radius: 0 4px 4px 0;
+      font-style: italic;
+      font-size: 0.97rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 28px 0;
+      border-radius: 4px;
+      border: 1px solid var(--bb-7);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    thead tr { background: var(--bb-2); }
+    thead th {
+      padding: 11px 14px;
+      text-align: left;
+      color: var(--bb-8);
+      font-family: 'Source Serif 4', serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    tbody tr { border-bottom: 1px solid rgba(200,169,110,0.3); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: rgba(200,169,110,0.07); }
+    tbody td { padding: 10px 14px; vertical-align: top; line-height: 1.5; }
+    td:first-child { font-weight: 600; color: var(--bb-2); white-space: nowrap; }
+    td .none { color: var(--bb-6); font-style: italic; font-weight: 400; }
+
+    .build-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin: 28px 0;
+    }
+
+    .build-col h4 { margin-top: 0; }
+
+    .build-col ul { list-style: none; padding-left: 0; }
+    .build-col li {
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(200,169,110,0.3);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .build-col li:last-child { border-bottom: none; }
+
+    .ratio {
+      margin: 28px 0 0 0;
+      padding: 18px 24px;
+      border: 1px solid var(--bb-7);
+      border-radius: 4px;
+      background: rgba(200,169,110,0.1);
+      font-size: 0.97rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--bb-7);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--bb-6);
+      max-width: 740px;
+      margin: 0 auto;
+    }
+
+    footer a { color: var(--bb-2); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 620px) {
+      .header-inner, main, footer { padding-left: 20px; padding-right: 20px; }
+      h1 { font-size: 1.75rem; }
+      .build-cols { grid-template-columns: 1fr; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <span class="doc-label">Medhavi · Product Spec</span>
+    <h1>Medhavi 1.0 → 1.5</h1>
+    <p class="h1-sub">What Exists, What's Being Built, and Why</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="lead">
+    Medhavi 1.0 is a secure textbook portal with a chatbot attached.
+    Medhavi 1.5 turns it into an adaptive learning system that knows
+    where you are, offers the right kind of help, and logs everything
+    so the next version can learn from it.
+  </div>
+
+  <h2>What Medhavi 1.0 Does Today</h2>
+
+  <h3>The infrastructure that works</h3>
+
+  <p><strong>hub.medhavy.com</strong> is the authentication hub. Learners log in here.
+  Admins manage textbooks, users, and access permissions here.
+  Instructors manage classes and invite students here.</p>
+
+  <p><strong>cancer.medhavy.com</strong> is a protected textbook. Learners authenticate
+  at the hub, receive a JWT token, and the textbook lets them in.
+  The content is a full Fumadocs MDX textbook with chapters, sections,
+  search, and navigation.</p>
+
+  <p><strong>The protection model works.</strong> JWT tokens, session cookies, role-based
+  access (admin / instructor / student), logout invalidation across all
+  textbooks simultaneously. This is solid and stays unchanged.</p>
+
+  <p><strong>Analytics exist.</strong> PostHog tracks page views and basic session data.
+  Session time is logged. The admin can see who is using the platform.</p>
+
+  <h3>The one thing 1.0 cannot do</h3>
+
+  <p>There is one AI interaction: an "Ask AI" button on the textbook page.
+  The learner opens it, asks a question, the AI responds.</p>
+
+  <ul>
+    <li>The AI does not know which section the learner is on.</li>
+    <li>The AI does not know whether the learner is a novice or advanced.</li>
+    <li>The AI does not know whether its response is working or not.</li>
+    <li>The AI does not vary its approach based on what the learner needs.</li>
+    <li>Nothing about the interaction is logged for learning purposes.</li>
+  </ul>
+
+  <div class="callout">
+    It is a general-purpose chatbot attached to a textbook.
+    It responds the same way to every learner on every concept
+    regardless of whether it is working.<br><br>
+    This is not a criticism of what was built. It is a description
+    of what the next version is designed to fix.
+  </div>
+
+  <h2>What Medhavi 1.5 Builds</h2>
+
+  <h3>Four modes instead of one</h3>
+
+  <p>The single "Ask AI" button becomes four:</p>
+
+  <div class="mode-row">
+    <div class="mode-btn">Ask AI</div>
+    <div class="mode-btn">Case Study</div>
+    <div class="mode-btn">Quiz Me</div>
+    <div class="mode-btn">Glimmer</div>
+  </div>
+
+  <p>Each mode is a different kind of help for a different learning need.</p>
+
+  <p><strong>Ask AI</strong> — same as today, upgraded. The AI now knows which section you're on and responds in context. "I don't get this" → AI responds about the Warburg Effect in section 11.2, not about cancer biology in general.</p>
+
+  <p><strong>Case Study</strong> — a clinical scenario anchored to this concept. Pre-written, reviewed by Professor Bear before any learner sees it. Presents genuine clinical ambiguity — the answer is not telegraphed. The AI facilitates discussion without giving away the reasoning.</p>
+
+  <p><strong>Quiz Me</strong> — spaced retrieval anchored to this section. Only available after you've read the section before. Questions test the concept you're on plus the foundational concepts it depends on. FSRS scheduling — the system tracks your accuracy and brings back the concepts you're weakest on.</p>
+
+  <p><strong>Glimmer</strong> — a creative, non-trivial assignment. The learner makes something that didn't exist before. There is no correct answer. Graded on: the WHY, the usefulness, the mechanism, the defensibility, the specificity. Composes into a term project the learner doesn't know they're building.</p>
+
+  <h3>Context awareness</h3>
+
+  <p>The system now knows where you are. Not just which textbook —
+  which chapter, which section, which concept node.</p>
+
+  <p>When you open Ask AI from section 11.2, the AI knows you're on
+  the Warburg Effect. When you open Case Study, the case is about
+  tumor metabolism. When you open Quiz Me, the questions are about
+  aerobic glycolysis and its prerequisites.</p>
+
+  <p>This is achieved through a <strong>concept node map</strong> — a structured file
+  that maps every chapter and section to a named concept, its aliases,
+  and the concepts that must be understood before it.</p>
+
+  <h3>Signal collection</h3>
+
+  <p>Every learner action is now logged for learning purposes:</p>
+
+  <ul>
+    <li>Which section they're on and for how long</li>
+    <li>Which mode they chose</li>
+    <li>What type of question they asked (clarifying? probing? claim-making?)</li>
+    <li>How they performed on retrieval questions</li>
+    <li>Whether the AI approach seemed to be working</li>
+  </ul>
+
+  <div class="callout">
+    None of this was logged in 1.0. In 1.5, it is all logged.<br><br>
+    This is not surveillance. It is the instrument.
+    When the adaptive version arrives (2.0), it reads this data to make
+    better decisions about which approach to try for which learner
+    on which concept. Without 1.5 data, 2.0 has nothing to learn from.
+  </div>
+
+  <h3>Content reviewed by Professor Bear</h3>
+
+  <p>In 1.0, the AI responds however it responds. No review.</p>
+
+  <p>In 1.5, before any learner sees a case study or a glimmer:</p>
+  <ul>
+    <li>Professor Bear reads it</li>
+    <li>Professor Bear edits it if needed</li>
+    <li>Professor Bear approves it</li>
+  </ul>
+
+  <p>Cases are reviewed for genuine clinical ambiguity.
+  Glimmer entry points are reviewed for whether the specific detail
+  actually activates inquiry in a second-year student.
+  AI prompts are reviewed for whether the mode behavior is correct.</p>
+
+  <p>The admin panel gets new tabs for this review workflow.</p>
+
+  <h3>A new kind of assignment: the Glimmer</h3>
+
+  <p>The glimmer is the most important new thing in 1.5.</p>
+
+  <p>It is creative and non-trivial. The learner produces something —
+  a clinical proposal, a protocol design, a structured analysis.
+  The problem space is specified. The solution space is open.
+  There is no correct answer.</p>
+
+  <p>Before the instructor grades it, the AI reviews it.
+  The AI asks one question at a time about the weakest part of the
+  learner's reasoning — the WHY, the usefulness, the mechanism,
+  the defensibility, the specificity.</p>
+
+  <p>The learner strengthens their reasoning. The instructor sees
+  the result of that strengthening.</p>
+
+  <p>Eight to twelve glimmers across a course compose into a term project
+  the learner doesn't know they're building. At week ten or eleven,
+  the system surfaces what they've built. The connective tissue —
+  the argument that holds the pieces together — is what remains.</p>
+
+  <h2>What Is Not Being Built in 1.5</h2>
+
+  <p><strong>The bandit</strong> — the adaptive engine that automatically selects the
+  right mode for each learner on each concept based on what is working —
+  is not in 1.5. Learners choose their mode explicitly.</p>
+
+  <p>This is not a compromise. It is the right sequencing.</p>
+
+  <p>The bandit needs data to work. 1.5 generates that data.
+  Every mode choice, every session signal, every retrieval score
+  is logged in a format the bandit can read when it arrives in 2.0.</p>
+
+  <p>The bandit also needs to know what "working" means — which signal
+  patterns indicate genuine learning vs. false mastery. 1.5 is
+  the experiment that produces that knowledge.</p>
+
+  <div class="callout">
+    Building the bandit before running the experiment would be building
+    a sophisticated instrument to measure something you haven't yet
+    decided how to measure.
+  </div>
+
+  <h2>What Stays the Same</h2>
+
+  <p>The following are unchanged in 1.5:</p>
+
+  <ul>
+    <li>All existing auth (Clerk, JWT, session cookies)</li>
+    <li>Textbook protection model (hub issues token, textbook validates)</li>
+    <li>Admin panel for textbook management, users, classes, requests</li>
+    <li>Student dashboard for accessing textbooks</li>
+    <li>PostHog analytics</li>
+    <li>The cancer textbook content and navigation</li>
+    <li>All existing API routes</li>
+  </ul>
+
+  <p>Medhavi 1.5 is built in parallel on AWS.
+  Medhavi 1.0 runs unchanged throughout.
+  No live course content is touched.</p>
+
+  <h2>The Architecture Change</h2>
+
+  <p>One structural change in how the shell and textbooks communicate.</p>
+
+  <p><strong>In 1.0:</strong> The textbook has auth logic built in. JWT verification
+  happens inside the textbook. The shell and textbook share auth
+  but not much else.</p>
+
+  <p><strong>In 1.5:</strong> The textbook is content-only. It renders MDX and
+  emits events. The shell owns all intelligence: auth, AI,
+  mode orchestration, signal logging. The textbook installs
+  one script tag. That's the entire integration.</p>
+
+  <p>This separation means:</p>
+  <ul>
+    <li>Adding a new textbook requires no code changes to the AI layer</li>
+    <li>Updating the AI logic requires no changes to the textbook content</li>
+    <li>The textbook can have videos, simulations, and complex navigation
+    without any of that breaking the learning system above it</li>
+  </ul>
+
+  <h2>Why Now</h2>
+
+  <p>The cancer course is running. Learners are in the textbook today.</p>
+
+  <p>They have one mode. The AI responds the same way to every learner
+  on every concept. Nothing is logged for learning purposes.</p>
+
+  <p>Medhavi 1.5 gives them four modes, context-aware AI, retrieval
+  practice, case studies, and a new kind of assignment that develops
+  the reasoning capacities that matter after the course ends.</p>
+
+  <p>It gives Professor Bear visibility into which concepts are not landing
+  and which modes learners are reaching for.</p>
+
+  <p>It gives the institution outcome data — not engagement proxies —
+  that reflects whether learning is actually happening.</p>
+
+  <p>And it builds the data foundation that makes the adaptive version
+  possible. The bandit cannot arrive on an empty database.</p>
+
+  <h2>Summary Table</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Medhavi 1.0</th>
+          <th>Medhavi 1.5</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>AI modes</td><td><span class="none">1 (Ask AI)</span></td><td>4 (Ask AI, Case Study, Quiz Me, Glimmer)</td></tr>
+        <tr><td>Context awareness</td><td><span class="none">None</span></td><td>Section-level (concept node)</td></tr>
+        <tr><td>Mode selection</td><td><span class="none">None</span></td><td>Learner-chosen</td></tr>
+        <tr><td>Case studies</td><td><span class="none">None</span></td><td>Pre-generated, Professor Bear approved</td></tr>
+        <tr><td>Retrieval practice</td><td><span class="none">None</span></td><td>FSRS-scheduled, concept-anchored</td></tr>
+        <tr><td>Glimmer assignments</td><td><span class="none">None</span></td><td>Creative, non-trivial, AI-reviewed</td></tr>
+        <tr><td>Term project</td><td><span class="none">None</span></td><td>Emerges from glimmer composition</td></tr>
+        <tr><td>Signal logging</td><td><span class="none">Engagement only (PostHog)</span></td><td>Learning signals per concept node</td></tr>
+        <tr><td>Instructor view</td><td><span class="none">None</span></td><td>Mode usage, retrieval accuracy, glimmer grading</td></tr>
+        <tr><td>Learner portfolio</td><td><span class="none">None</span></td><td>Glimmer history, term project progress</td></tr>
+        <tr><td>Content review</td><td><span class="none">None</span></td><td>Professor Bear approves all cases and glimmers</td></tr>
+        <tr><td>Bandit</td><td><span class="none">None</span></td><td>Not in 1.5 — data collected for 2.0</td></tr>
+        <tr><td>Live course risk</td><td><span class="none">Running</span></td><td>None — parallel build on AWS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>What Gets Built, By Whom</h2>
+
+  <div class="build-cols">
+    <div class="build-col">
+      <h4>Claude Code builds</h4>
+      <ul>
+        <li>Supabase schema (all tables, indexes)</li>
+        <li>Auth extension (scoped JWTs for textbook subdomains)</li>
+        <li>Textbook event listener (postMessage, section tracking)</li>
+        <li>Section Context Resolver (concept node lookup)</li>
+        <li>Learner Profile (expertise estimates, session history)</li>
+        <li>Prompt Registry (versioned AI prompts per mode)</li>
+        <li>AI Orchestration Layer (four modes, streaming)</li>
+        <li>Retrieval Question Generator (FSRS scheduling)</li>
+        <li>Pre-generation scripts (cases and glimmer scaffolds)</li>
+        <li>Mode selector UI (four buttons, availability logic)</li>
+        <li>Glimmer panel (writing space, submission, AI evaluator)</li>
+        <li>Term project reveal (threshold detection, portfolio view)</li>
+        <li>Admin interfaces (case review, glimmer review, submission grading)</li>
+        <li>Instructor dashboard (mode usage, retrieval accuracy, pending grades)</li>
+        <li>Learner portfolio (glimmer history, term project progress)</li>
+      </ul>
+    </div>
+    <div class="build-col">
+      <h4>Professor Bear builds</h4>
+      <ul>
+        <li>Cancer textbook concept node map (every chapter and section: canonical name, aliases, prerequisites)</li>
+        <li>Term project briefs (what the learner is building across the course — before glimmers are designed)</li>
+        <li>Glimmer entry points (selecting the specific detail that activates inquiry from AI-generated candidates)</li>
+        <li>AI prompts for all four modes (via PEDAGOGUE interview tool → reviewed in context)</li>
+        <li>Case study approvals (reading and editing CAZE-generated cases for chapters 1–3 before launch)</li>
+        <li>Validation of FSRS intervals (the right spacing for a clinical course cohort)</li>
+        <li>First session review (are the signals meaningful? are the glimmer submissions creative proposals or literature reviews in disguise?)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ratio">
+    <p><strong>The ratio:</strong> 13 Claude Code tasks, 11 Professor Bear tasks.</p>
+    <p>The content layer is irreducibly human. The engineering layer is not.</p>
+  </div>
+
+</main>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>
