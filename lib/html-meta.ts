@@ -99,7 +99,7 @@ function scanHtmlDirRecursive(base: string, rel: string = ''): HtmlDocMeta[] {
   return docs
 }
 
-/** Scan subdirectories of `dir`, returning docs grouped by top-level folder name, sorted alphabetically. Recurses into nested subdirectories. */
+/** Scan subdirectories of `dir`, returning docs grouped by top-level folder name, sorted alphabetically. Recurses into nested subdirectories. Top-level HTML files are included in a "General" group. */
 export function scanHtmlSubdirs(dir: string): GroupedHtmlDocs[] {
   let entries: string[]
   try {
@@ -109,6 +109,16 @@ export function scanHtmlSubdirs(dir: string): GroupedHtmlDocs[] {
   }
 
   const groups: GroupedHtmlDocs[] = []
+
+  // Top-level HTML files go into a "General" group
+  const topLevelDocs = scanHtmlDir(dir)
+  if (topLevelDocs.length > 0) {
+    groups.push({
+      folder: '',
+      folderTitle: 'General',
+      docs: topLevelDocs.sort((a, b) => a.title.localeCompare(b.title)),
+    })
+  }
 
   for (const entry of entries) {
     const fullPath = join(dir, entry)
