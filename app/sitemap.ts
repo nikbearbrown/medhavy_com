@@ -1,9 +1,32 @@
 import { MetadataRoute } from 'next'
 import { neon } from '@neondatabase/serverless'
+import path from 'path'
+import { scanCourses, scanLessons } from '@/lib/courses'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://medhavy.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Courses (filesystem-driven)
+  const coursesDir = path.join(process.cwd(), 'public/courses')
+  const courses = scanCourses(coursesDir)
+  const courseEntries: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/courses`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    ...courses.map(c => ({
+      url: `${BASE_URL}/courses/${c.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })),
+    ...courses.flatMap(c =>
+      scanLessons(coursesDir, c.slug).map(l => ({
+        url: `${BASE_URL}${l.path}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.5,
+      }))
+    ),
+  ]
+
   const entries: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
     { url: `${BASE_URL}/tools`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
@@ -75,5 +98,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // If database is not configured, just return static pages
   }
 
-  return entries
+  return [...entries, ...courseEntries]
 }
