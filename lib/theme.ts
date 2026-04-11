@@ -1,15 +1,15 @@
 export const theme = {
   // Medhavy default palette — swap these to rebrand the entire site
-  // All pairings meet WCAG AA contrast (4.5:1) against bb8 (cream)
+  // All pairings meet WCAG AA contrast (4.5:1) against bb8 (parchment)
   colors: {
-    bb1: '#1a0a00',   // near black — primary text
-    bb2: '#8B3A0F',   // burnt orange — primary accent, headers
-    bb3: '#A52A1A',   // deep crimson — alert, danger, emphasis
-    bb4: '#E8A020',   // amber — highlight, callout
-    bb5: '#B5420A',   // burnt sienna — secondary accent
-    bb6: '#B8860B',   // dark goldenrod — muted accent
-    bb7: '#C8A96E',   // warm tan — borders, subtle backgrounds
-    bb8: '#F0E6D0',   // cream — page background, light surfaces
+    bb1: '#0D0D0D',   // soot black — primary text
+    bb2: '#4A4A4A',   // iron grey — primary accent, headers
+    bb3: '#8B0000',   // dried-ink red — alert, danger, emphasis
+    bb4: '#8B7536',   // cold brass — highlight, callout
+    bb5: '#2F2F2F',   // charcoal — secondary accent
+    bb6: '#6B6B5E',   // tarnished pewter — muted accent
+    bb7: '#9C9680',   // aged ledger tan — borders, subtle backgrounds
+    bb8: '#E8E0D0',   // parchment — page background, light surfaces
   },
   // Semantic aliases — use these in components, not raw hex
   semantic: {
