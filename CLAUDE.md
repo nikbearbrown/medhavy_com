@@ -488,6 +488,22 @@ CREATE POLICY "service_role_articles" ON substack_articles FOR ALL USING (true) 
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS byline TEXT;
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS cover_image TEXT;
+
+CREATE TABLE IF NOT EXISTS videos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  youtube_id TEXT NOT NULL UNIQUE,
+  tags TEXT[] DEFAULT '{}',
+  pinned BOOLEAN DEFAULT false,
+  published BOOLEAN DEFAULT false,
+  published_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public_read_videos" ON videos FOR SELECT USING (published = true);
+CREATE POLICY "service_role_videos" ON videos FOR ALL USING (true) WITH CHECK (true);
 ```
 
 3. **Environment variables** — Add to `.env.local` (local dev) and Vercel project settings (production):

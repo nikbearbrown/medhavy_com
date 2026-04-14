@@ -9,5 +9,6 @@ export async function POST() {
   }
 
   const groups = scanHtmlSubdirs(join(process.cwd(), 'public', 'dev'))
-  return NextResponse.json({ groups })
+  const docs = groups.flatMap((g) => g.docs)
+  return NextResponse.json({ docs })
 }
