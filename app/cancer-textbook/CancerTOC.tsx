@@ -9,10 +9,11 @@ const PARTS = [
     label: 'Foundations of Cell Biology & Cancer',
     shortLabel: 'Foundations',
     range: 'Ch. 1–9',
-    accent: 'bg-slate-600',
-    accentLight: 'bg-slate-100 dark:bg-slate-800',
-    accentBorder: 'border-slate-500',
-    accentText: 'text-slate-600 dark:text-slate-400',
+    accent: 'bg-foreground',
+    accentLight: 'bg-foreground/5 dark:bg-foreground/10',
+    accentBorder: 'border-foreground/30',
+    accentText: 'text-foreground',
+    partNumber: 'Part 1',
     chapters: [
       { num: 1, title: 'The Building Blocks of Life : Normal Cell Biology' },
       { num: 2, title: 'Introduction to Cancer : A Disease of Deregulation' },
@@ -29,10 +30,11 @@ const PARTS = [
     label: 'Disease Mechanisms & Microenvironment',
     shortLabel: 'Mechanisms',
     range: 'Ch. 10–16',
-    accent: 'bg-emerald-600',
-    accentLight: 'bg-emerald-50 dark:bg-emerald-900/30',
-    accentBorder: 'border-emerald-500',
-    accentText: 'text-emerald-600 dark:text-emerald-400',
+    accent: 'bg-foreground',
+    accentLight: 'bg-foreground/5 dark:bg-foreground/10',
+    accentBorder: 'border-foreground/30',
+    accentText: 'text-foreground',
+    partNumber: 'Part 2',
     chapters: [
       { num: 10, title: 'Apoptosis and Programmed Cell Death in Cancer' },
       { num: 11, title: 'Cancer Metabolism - The Warburg Effect and Beyond' },
@@ -47,10 +49,11 @@ const PARTS = [
     label: 'Prevention, Detection & Diagnosis',
     shortLabel: 'Prevention',
     range: 'Ch. 17–19',
-    accent: 'bg-amber-600',
-    accentLight: 'bg-amber-50 dark:bg-amber-900/20',
-    accentBorder: 'border-amber-500',
-    accentText: 'text-amber-600 dark:text-amber-400',
+    accent: 'bg-foreground',
+    accentLight: 'bg-foreground/5 dark:bg-foreground/10',
+    accentBorder: 'border-foreground/30',
+    accentText: 'text-foreground',
+    partNumber: 'Part 3',
     chapters: [
       { num: 17, title: 'Cancer Prevention and Screening' },
       { num: 18, title: 'Cancer Detection and Diagnosis' },
@@ -61,10 +64,11 @@ const PARTS = [
     label: 'Treatment Modalities',
     shortLabel: 'Treatment',
     range: 'Ch. 20–27',
-    accent: 'bg-sky-600',
-    accentLight: 'bg-sky-50 dark:bg-sky-900/20',
-    accentBorder: 'border-sky-500',
-    accentText: 'text-sky-600 dark:text-sky-400',
+    accent: 'bg-foreground',
+    accentLight: 'bg-foreground/5 dark:bg-foreground/10',
+    accentBorder: 'border-foreground/30',
+    accentText: 'text-foreground',
+    partNumber: 'Part 4',
     chapters: [
       { num: 20, title: 'Surgical Oncology' },
       { num: 21, title: 'Radiation Oncology' },
@@ -80,10 +84,11 @@ const PARTS = [
     label: 'Cancer by Disease & System',
     shortLabel: 'Disease',
     range: 'Ch. 28–35',
-    accent: 'bg-violet-600',
-    accentLight: 'bg-violet-50 dark:bg-violet-900/20',
-    accentBorder: 'border-violet-500',
-    accentText: 'text-violet-600 dark:text-violet-400',
+    accent: 'bg-foreground',
+    accentLight: 'bg-foreground/5 dark:bg-foreground/10',
+    accentBorder: 'border-foreground/30',
+    accentText: 'text-foreground',
+    partNumber: 'Part 5',
     chapters: [
       { num: 28, title: 'Clinical Trials and Regulatory Pathways' },
       { num: 29, title: 'Future Directions in Cancer Treatment Research' },
@@ -99,10 +104,11 @@ const PARTS = [
     label: 'Supportive Care, Survivorship & Health Systems',
     shortLabel: 'Survivorship',
     range: 'Ch. 36–38',
-    accent: 'bg-rose-600',
-    accentLight: 'bg-rose-50 dark:bg-rose-900/20',
-    accentBorder: 'border-rose-500',
-    accentText: 'text-rose-600 dark:text-rose-400',
+    accent: 'bg-foreground',
+    accentLight: 'bg-foreground/5 dark:bg-foreground/10',
+    accentBorder: 'border-foreground/30',
+    accentText: 'text-foreground',
+    partNumber: 'Part 6',
     chapters: [
       { num: 36, title: 'Supportive Care and Palliative Care in Oncology' },
       { num: 37, title: 'Cancer Survivorship' },
@@ -113,10 +119,11 @@ const PARTS = [
     label: 'Appendices',
     shortLabel: 'Appendices',
     range: 'A–D',
-    accent: 'bg-neutral-600',
-    accentLight: 'bg-neutral-100 dark:bg-neutral-800/40',
-    accentBorder: 'border-neutral-500',
-    accentText: 'text-neutral-600 dark:text-neutral-400',
+    accent: 'bg-foreground',
+    accentLight: 'bg-foreground/5 dark:bg-foreground/10',
+    accentBorder: 'border-foreground/30',
+    accentText: 'text-foreground',
+    partNumber: 'Appendices',
     chapters: [
       { num: 'A', title: 'Experimental Models in Cancer Research' },
       { num: 'B', title: 'Essential Techniques and Assays in Cancer Research' },
@@ -140,22 +147,26 @@ export default function CancerTOC() {
   return (
     <div className="w-full max-w-5xl mx-auto">
       {/* ─── Part Tabs ─────────────────────────── */}
-      <div className="flex flex-wrap justify-center gap-2 mb-10">
+      <div className="flex flex-wrap justify-center gap-2 mb-10" role="tablist" aria-label="Textbook parts navigation">
         {PARTS.map((part, i) => (
           <button
             key={i}
             onClick={() => handleTabClick(i)}
+            role="tab"
+            aria-selected={activeIdx === i}
+            aria-controls={`tabpanel-part-${i}`}
+            id={`tab-part-${i}`}
             className={cn(
-              'relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 border',
+              'relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               activeIdx === i
                 ? 'bg-foreground text-background border-foreground shadow-lg scale-105'
-                : 'bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30',
+                : 'bg-card border-border text-foreground/70 hover:text-foreground hover:border-foreground/30',
             )}
           >
             <span className="hidden md:inline">{part.label}</span>
             <span className="md:hidden">{part.shortLabel}</span>
             {activeIdx === i && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-foreground" />
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-foreground" aria-hidden="true" />
             )}
           </button>
         ))}
@@ -164,22 +175,28 @@ export default function CancerTOC() {
       {/* ─── Part Header ──────────────────────── */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 mb-2">
-          <span className={cn('w-3 h-3 rounded-full', activePart.accent)} />
-          <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-            {activeIdx < 6 ? `Part ${activeIdx + 1}` : 'Appendices'} &middot; {activePart.range}
+          <span className={cn('w-3 h-3 rounded-full', activePart.accent)} aria-hidden="true" />
+          <span className="text-sm font-bold uppercase tracking-widest text-foreground/70">
+            {activePart.partNumber} &middot; {activePart.range}
           </span>
         </div>
         <h3 className="text-2xl font-bold tracking-tight">{activePart.label}</h3>
       </div>
 
       {/* ─── Chapter Cards (animated) ─────────── */}
-      <div key={animKey} className="space-y-3 max-w-3xl mx-auto">
+      <div
+        key={animKey}
+        className="space-y-3 max-w-3xl mx-auto"
+        role="tabpanel"
+        id={`tabpanel-part-${activeIdx}`}
+        aria-labelledby={`tab-part-${activeIdx}`}
+      >
         {activePart.chapters.map((ch, j) => (
           <div
             key={`${activeIdx}-${ch.num}`}
             className={cn(
               'group flex items-stretch rounded-xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-foreground/20',
-              'opacity-0 animate-[slideUp_0.4s_ease-out_forwards]',
+              'opacity-0 animate-[slideUp_0.4s_ease-out_forwards] motion-reduce:opacity-100 motion-reduce:animate-none',
             )}
             style={{ animationDelay: `${j * 70}ms` }}
           >
@@ -190,7 +207,7 @@ export default function CancerTOC() {
                 activePart.accentLight,
               )}
             >
-              <span className={cn('text-2xl font-extrabold', activePart.accentText)}>
+              <span className={cn('text-2xl font-extrabold', activePart.accentText)} aria-hidden="true">
                 {typeof ch.num === 'number' ? ch.num : ch.num}
               </span>
             </div>
@@ -198,38 +215,39 @@ export default function CancerTOC() {
             {/* Chapter Content */}
             <div className="flex-1 px-5 py-4 flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60 mb-1">
                   {typeof ch.num === 'number' ? `Chapter ${ch.num}` : `Appendix ${ch.num}`}
                 </p>
                 <h4 className="font-semibold text-foreground group-hover:text-foreground/90 transition-colors">
                   {ch.title}
                 </h4>
               </div>
-              <BookOpen className="w-5 h-5 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors shrink-0" />
+              <BookOpen className="w-5 h-5 text-foreground/25 group-hover:text-foreground/50 transition-colors shrink-0" aria-hidden="true" />
             </div>
 
             {/* Left accent bar */}
-            <div className={cn('w-1 shrink-0', activePart.accent, 'opacity-0 group-hover:opacity-100 transition-opacity')} />
+            <div className={cn('w-1 shrink-0', activePart.accent, 'opacity-0 group-hover:opacity-100 transition-opacity')} aria-hidden="true" />
           </div>
         ))}
       </div>
 
       {/* ─── Progress / Stats Bar ─────────────── */}
-      <div className="mt-10 flex items-center justify-center gap-1.5 max-w-3xl mx-auto">
+      <nav aria-label="Table of contents parts" className="mt-10 flex items-center justify-center gap-1.5 max-w-3xl mx-auto">
         {PARTS.map((part, i) => (
           <button
             key={i}
             onClick={() => handleTabClick(i)}
             className={cn(
-              'h-1.5 rounded-full transition-all duration-500 cursor-pointer',
+              'h-1.5 rounded-full transition-all duration-500 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               activeIdx === i
-                ? `${part.accent} flex-[3]`
-                : 'bg-border flex-1 hover:bg-muted-foreground/30',
+                ? `bg-foreground flex-[3]`
+                : 'bg-foreground/20 flex-1 hover:bg-foreground/40',
             )}
             aria-label={`Go to ${part.label}`}
+            aria-current={activeIdx === i ? 'true' : undefined}
           />
         ))}
-      </div>
+      </nav>
     </div>
   )
 }
