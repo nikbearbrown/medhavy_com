@@ -2,7 +2,8 @@ import { join } from 'path'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { scanHtmlDir } from '@/lib/html-meta'
-import { scanFlatCategory, scanLectures } from '@/lib/ai1'
+import { scanFlatCategory } from '@/lib/ai1'
+import lectureManifest from '@/lib/lectures-manifest.json'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,8 +15,7 @@ export const metadata: Metadata = {
 export default function Ai1Page() {
   const pub = join(process.cwd(), 'public')
   const toolCount = scanHtmlDir(join(pub, 'artifacts')).length
-  const lectureGroups = scanLectures(join(pub, 'ai1', 'lectures'))
-  const lectureCount = lectureGroups.reduce((n, g) => n + g.docs.length, 0)
+  const lectureCount = lectureManifest.reduce((n, g) => n + g.docs.length, 0)
   const vizCount = scanFlatCategory(join(pub, 'ai1', 'visualizations'), '/ai1/visualizations', '/ai1/visualizations').length
   const simCount = scanFlatCategory(join(pub, 'ai1', 'simulations'), '/ai1/simulations', '/ai1/simulations').length
 
