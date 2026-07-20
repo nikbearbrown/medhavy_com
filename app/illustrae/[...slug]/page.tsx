@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { scanHtmlSubdirs } from '@/lib/html-meta'
+import VoteBar from '../VoteBar'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,6 +66,7 @@ export default async function IllustraeDocPage({
               <p className="text-sm text-muted-foreground mt-1">{description}</p>
             )}
           </div>
+          <VoteBar slug={slugPath} />
         </div>
       </div>
       <div className="flex-1 w-full">
