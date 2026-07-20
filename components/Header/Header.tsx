@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   //{ name: 'Books', href: '/books' },
   { name: 'Library', href: '/ai1' },
   { name: 'Cancer Textbook', href: '/cancer-textbook' },
+  { name: 'Previz', href: '/illustrae' },
   //{ name: 'Tools', href: '/tools' },
   //{ name: 'Blog', href: '/blog' },
   { name: 'Learning Hub', href: 'https://hub.medhavy.com/' },
