@@ -1,3 +1,4 @@
+import { blogMutationResponse } from '@/lib/blog-cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 import { isAdmin } from '@/lib/admin-auth'
@@ -79,7 +80,7 @@ export async function PUT(
     if (rows.length === 0) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
-    return NextResponse.json(rows[0])
+    return blogMutationResponse(rows[0])
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Database error'
     return NextResponse.json({ error: message }, { status: 500 })
@@ -98,7 +99,7 @@ export async function DELETE(
 
   try {
     await sql`DELETE FROM blog_posts WHERE id = ${id}`
-    return NextResponse.json({ success: true })
+    return blogMutationResponse({ success: true })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Database error'
     return NextResponse.json({ error: message }, { status: 500 })

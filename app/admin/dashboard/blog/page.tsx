@@ -133,10 +133,25 @@ export default function BlogAdminPage() {
     }
   }
 
+  async function mutateBlog(url: string, options: RequestInit) {
+    const res = await fetch(url, options)
+    const data = await res.clone().json()
+    if (!res.ok) throw new Error(data.error || 'Blog change failed')
+    if (data.cacheWarning) window.alert(data.cacheWarning)
+    return res
+  }
+
+  async function refreshBlog() {
+    try {
+      await mutateBlog('/api/admin/blog/revalidate', { method: 'POST' })
+      setError('Public blog refresh requested. Pages regenerate on their next visit.')
+    } catch (err) { setError(err instanceof Error ? err.message : 'Refresh failed') }
+  }
+
   async function deletePost(id: string) {
     if (!confirm('Delete this post?')) return
     try {
-      const res = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' })
+      const res = await mutateBlog(`/api/admin/blog/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete')
       fetchPosts()
     } catch (err) {
@@ -147,11 +162,16 @@ export default function BlogAdminPage() {
   async function bulkDelete() {
     if (selectedIds.size === 0) return
     if (!confirm(`Delete ${selectedIds.size} selected posts?`)) return
-    for (const id of selectedIds) {
-      await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' })
+    try {
+      for (const id of selectedIds) {
+        await mutateBlog(`/api/admin/blog/${id}`, { method: 'DELETE' })
+      }
+      setSelectedIds(new Set())
+      fetchPosts()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk change failed')
+      fetchPosts()
     }
-    setSelectedIds(new Set())
-    fetchPosts()
   }
 
   async function bulkPublish() {
@@ -159,35 +179,45 @@ export default function BlogAdminPage() {
     const drafts = posts.filter(p => selectedIds.has(p.id) && !p.published)
     if (drafts.length === 0) return
     const now = new Date().toISOString()
-    for (const post of drafts) {
-      await fetch(`/api/admin/blog/${post.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ published: true, published_at: now }),
-      })
+    try {
+      for (const post of drafts) {
+        await mutateBlog(`/api/admin/blog/${post.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ published: true, published_at: now }),
+        })
+      }
+      setSelectedIds(new Set())
+      fetchPosts()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk change failed')
+      fetchPosts()
     }
-    setSelectedIds(new Set())
-    fetchPosts()
   }
 
   async function bulkUnpublish() {
     if (selectedIds.size === 0) return
     const published = posts.filter(p => selectedIds.has(p.id) && p.published)
     if (published.length === 0) return
-    for (const post of published) {
-      await fetch(`/api/admin/blog/${post.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ published: false }),
-      })
+    try {
+      for (const post of published) {
+        await mutateBlog(`/api/admin/blog/${post.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ published: false }),
+        })
+      }
+      setSelectedIds(new Set())
+      fetchPosts()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk change failed')
+      fetchPosts()
     }
-    setSelectedIds(new Set())
-    fetchPosts()
   }
 
   async function togglePublish(post: Post) {
     try {
-      const res = await fetch(`/api/admin/blog/${post.id}`, {
+      const res = await mutateBlog(`/api/admin/blog/${post.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
@@ -244,6 +274,7 @@ export default function BlogAdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tighter">Blog Posts</h2>
+          <button type="button" onClick={refreshBlog} className="text-sm underline">Refresh public blog</button>
           <p className="text-sm text-muted-foreground">
             Create and manage blog posts
           </p>
