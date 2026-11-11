@@ -1,10 +1,14 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { sql } from '@/lib/db'
+import { getPublishedPost, getPublishedPosts } from '@/lib/blog-cache'
 import { getReadingTime } from '@/lib/utils'
 import BlogVizHydrator from '@/components/BlogVizHydrator/BlogVizHydrator'
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-static'
+export const revalidate = 86400
+
+// Generate on first request, then serve cached HTML (including newly published slugs).
+export async function generateStaticParams() { return [] }
 
 export async function generateMetadata({
   params,
@@ -12,12 +16,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  try {
-    const rows = await sql`
-      SELECT title, subtitle, excerpt, cover_image FROM blog_posts WHERE slug = ${slug} AND published = true
-    `
-    if (rows.length > 0) {
-      const post = rows[0]
+  const post = await getPublishedPost(slug)
+  if (post) {
       return {
         title: `${post.title} - Medhavy`,
         description: post.excerpt || post.subtitle || post.title,
@@ -34,7 +34,6 @@ export async function generateMetadata({
         },
       }
     }
-  } catch {}
   return { title: 'Blog - Medhavy' }
 }
 
@@ -53,32 +52,12 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const rows = await sql`SELECT * FROM blog_posts WHERE slug = ${slug} AND published = true`
-
-  if (rows.length === 0) notFound()
-  const post = rows[0]
-
-  // Previous / Next posts
-  let prevPost: { title: string; slug: string } | null = null
-  let nextPost: { title: string; slug: string } | null = null
-
-  try {
-    if (post.published_at) {
-      const prev = await sql`
-        SELECT title, slug FROM blog_posts
-        WHERE published = true AND published_at < ${post.published_at}
-        ORDER BY published_at DESC LIMIT 1
-      `
-      if (prev.length > 0) prevPost = prev[0]
-
-      const next = await sql`
-        SELECT title, slug FROM blog_posts
-        WHERE published = true AND published_at > ${post.published_at}
-        ORDER BY published_at ASC LIMIT 1
-      `
-      if (next.length > 0) nextPost = next[0]
-    }
-  } catch {}
+  const post = await getPublishedPost(slug)
+  if (!post) notFound()
+  const posts = await getPublishedPosts()
+  const index = posts.findIndex(p => p.slug === slug)
+  const prevPost = index >= 0 ? posts[index + 1] : null
+  const nextPost = index > 0 ? posts[index - 1] : null
 
   const readingTime = getReadingTime(post.content || '')
 

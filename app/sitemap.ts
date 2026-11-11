@@ -1,7 +1,10 @@
+import { getPublishedPosts } from '@/lib/blog-cache'
 import { MetadataRoute } from 'next'
 import { neon } from '@neondatabase/serverless'
 import path from 'path'
 import { scanCourses, scanLessons } from '@/lib/courses'
+
+export const revalidate = 86400
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://medhavy.com'
 
@@ -45,21 +48,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/terms-of-service`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
   ]
 
+  // Blog posts
+  const blogPosts = await getPublishedPosts()
+  for (const p of blogPosts) {
+    entries.push({
+      url: `${BASE_URL}/blog/${p.slug}`,
+      lastModified: p.updated_at ? new Date(p.updated_at) : p.published_at ? new Date(p.published_at) : new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    })
+  }
+
   try {
     const db = neon(process.env.DATABASE_URL!)
-
-    // Blog posts
-    const blogPosts = await db`
-      SELECT slug, published_at, updated_at FROM blog_posts WHERE published = true
-    `
-    for (const p of blogPosts) {
-      entries.push({
-        url: `${BASE_URL}/blog/${p.slug}`,
-        lastModified: p.updated_at ? new Date(p.updated_at) : p.published_at ? new Date(p.published_at) : new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.8,
-      })
-    }
 
     // Tools (artifact type have their own pages)
     const tools = await db`

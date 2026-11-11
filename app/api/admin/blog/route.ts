@@ -1,3 +1,4 @@
+import { blogMutationResponse } from '@/lib/blog-cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 import { isAdmin } from '@/lib/admin-auth'
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
       VALUES (${title}, ${subtitle || null}, ${slug}, ${byline || null}, ${cover_image || null}, ${content}, ${excerpt || null}, ${published || false}, ${published ? new Date().toISOString() : null}, ${tagsArray})
       RETURNING *
     `
-    return NextResponse.json(rows[0])
+    return blogMutationResponse(rows[0])
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Database error'
     return NextResponse.json({ error: message }, { status: 500 })

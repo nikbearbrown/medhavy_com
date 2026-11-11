@@ -252,6 +252,8 @@ export default function BlogEditor({ post }: { post?: BlogPost }) {
         const data = await res.json()
         throw new Error(data.error || 'Failed to save')
       }
+      const saved = await res.json()
+      if (saved.cacheWarning) window.alert(saved.cacheWarning)
       router.push('/admin/dashboard/blog')
       router.refresh()
     } catch (err) {
